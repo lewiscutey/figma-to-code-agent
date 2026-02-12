@@ -22,13 +22,13 @@ describe('FigmaAPIClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Setup axios.create mock
     const mockAxiosInstance = {
       get: jest.fn(),
     };
     mockedAxios.create.mockReturnValue(mockAxiosInstance as any);
-    
+
     client = new FigmaAPIClient(mockAccessToken);
   });
 
@@ -70,10 +70,9 @@ describe('FigmaAPIClient', () => {
       const result = await client.getFile(mockFileKey);
 
       expect(result).toEqual(mockFigmaFile);
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        `/files/${mockFileKey}`,
-        { params: undefined }
-      );
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(`/files/${mockFileKey}`, {
+        params: undefined,
+      });
     });
 
     it('should throw error when file key is not provided', async () => {
@@ -114,13 +113,13 @@ describe('FigmaAPIClient', () => {
         isAxiosError: true,
         request: {},
       };
-      
+
       // Fail twice, then succeed
       mockAxiosInstance.get
         .mockRejectedValueOnce(networkError)
         .mockRejectedValueOnce(networkError)
         .mockResolvedValueOnce({ data: mockFigmaFile });
-      
+
       mockedAxios.isAxiosError.mockReturnValue(true);
 
       const result = await client.getFile(mockFileKey);
@@ -135,12 +134,12 @@ describe('FigmaAPIClient', () => {
         isAxiosError: true,
         response: { status: 500 },
       };
-      
+
       // Fail once, then succeed
       mockAxiosInstance.get
         .mockRejectedValueOnce(serverError)
         .mockResolvedValueOnce({ data: mockFigmaFile });
-      
+
       mockedAxios.isAxiosError.mockReturnValue(true);
 
       const result = await client.getFile(mockFileKey);
@@ -155,12 +154,12 @@ describe('FigmaAPIClient', () => {
         isAxiosError: true,
         response: { status: 429, headers: { 'retry-after': '1' } },
       };
-      
+
       // Fail once, then succeed
       mockAxiosInstance.get
         .mockRejectedValueOnce(rateLimitError)
         .mockResolvedValueOnce({ data: mockFigmaFile });
-      
+
       mockedAxios.isAxiosError.mockReturnValue(true);
 
       const result = await client.getFile(mockFileKey);
@@ -176,7 +175,7 @@ describe('FigmaAPIClient', () => {
         request: {},
         message: 'Network error',
       };
-      
+
       mockAxiosInstance.get.mockRejectedValue(networkError);
       mockedAxios.isAxiosError.mockReturnValue(true);
 
@@ -201,22 +200,17 @@ describe('FigmaAPIClient', () => {
       const result = await client.getImages(mockFileKey, mockNodeIds, 'png');
 
       expect(result).toEqual(mockImageMap);
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
-        `/images/${mockFileKey}`,
-        {
-          params: {
-            ids: '1:1,1:2',
-            format: 'png',
-            scale: 2,
-          },
-        }
-      );
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(`/images/${mockFileKey}`, {
+        params: {
+          ids: '1:1,1:2',
+          format: 'png',
+          scale: 2,
+        },
+      });
     });
 
     it('should throw error when file key is not provided', async () => {
-      await expect(client.getImages('', mockNodeIds)).rejects.toThrow(
-        'File key is required'
-      );
+      await expect(client.getImages('', mockNodeIds)).rejects.toThrow('File key is required');
     });
 
     it('should throw error when node IDs are empty', async () => {
@@ -277,10 +271,7 @@ describe('FigmaAPIClient', () => {
         responseType: 'arraybuffer',
         timeout: 60000,
       });
-      expect(mockedFs.writeFileSync).toHaveBeenCalledWith(
-        mockOutputPath,
-        mockImageData
-      );
+      expect(mockedFs.writeFileSync).toHaveBeenCalledWith(mockOutputPath, mockImageData);
     });
 
     it('should skip download if file already exists (cached)', async () => {
@@ -321,21 +312,18 @@ describe('FigmaAPIClient', () => {
         isAxiosError: true,
         request: {},
       };
-      
+
       // Fail once, then succeed
       mockedAxios.get
         .mockRejectedValueOnce(networkError)
         .mockResolvedValueOnce({ data: mockImageData });
-      
+
       mockedAxios.isAxiosError.mockReturnValue(true);
 
       await client.downloadImage(mockImageUrl, mockOutputPath);
 
       expect(mockedAxios.get).toHaveBeenCalledTimes(2);
-      expect(mockedFs.writeFileSync).toHaveBeenCalledWith(
-        mockOutputPath,
-        mockImageData
-      );
+      expect(mockedFs.writeFileSync).toHaveBeenCalledWith(mockOutputPath, mockImageData);
     });
   });
 });

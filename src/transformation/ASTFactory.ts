@@ -13,32 +13,27 @@ import {
   Size,
   Spacing,
   Color,
-} from './types'
+} from './types';
 
 /**
  * Create a default position at origin
  */
 export function createPosition(x = 0, y = 0): Position {
-  return { x, y }
+  return { x, y };
 }
 
 /**
  * Create a default size
  */
 export function createSize(width = 0, height = 0): Size {
-  return { width, height }
+  return { width, height };
 }
 
 /**
  * Create uniform spacing
  */
-export function createSpacing(value: number): Spacing
-export function createSpacing(
-  top: number,
-  right: number,
-  bottom: number,
-  left: number
-): Spacing
+export function createSpacing(value: number): Spacing;
+export function createSpacing(top: number, right: number, bottom: number, left: number): Spacing;
 export function createSpacing(
   topOrValue: number,
   right?: number,
@@ -52,35 +47,33 @@ export function createSpacing(
       right: topOrValue,
       bottom: topOrValue,
       left: topOrValue,
-    }
+    };
   }
   return {
     top: topOrValue,
     right: right!,
     bottom: bottom!,
     left: left!,
-  }
+  };
 }
 
 /**
  * Create an RGBA color
  */
 export function createColor(r: number, g: number, b: number, a = 1): Color {
-  return { r, g, b, a }
+  return { r, g, b, a };
 }
 
 /**
  * Create a default layout info
  */
-export function createLayoutInfo(
-  overrides: Partial<LayoutInfo> = {}
-): LayoutInfo {
+export function createLayoutInfo(overrides: Partial<LayoutInfo> = {}): LayoutInfo {
   return {
     display: 'block',
     position: createPosition(),
     size: createSize(),
     ...overrides,
-  }
+  };
 }
 
 /**
@@ -89,7 +82,7 @@ export function createLayoutInfo(
 export function createStyleInfo(overrides: Partial<StyleInfo> = {}): StyleInfo {
   return {
     ...overrides,
-  }
+  };
 }
 
 /**
@@ -106,37 +99,28 @@ export function createNodeMetadata(
     isComponent: false,
     exportable: true,
     ...overrides,
-  }
+  };
 }
 
 /**
  * Options for creating an AST node
  */
 export interface CreateASTNodeOptions {
-  id: string
-  type: ASTNodeType
-  name: string
-  layout?: Partial<LayoutInfo>
-  styles?: Partial<StyleInfo>
-  metadata: NodeMetadata
-  children?: ASTNode[]
-  parent?: ASTNode
+  id: string;
+  type: ASTNodeType;
+  name: string;
+  layout?: Partial<LayoutInfo>;
+  styles?: Partial<StyleInfo>;
+  metadata: NodeMetadata;
+  children?: ASTNode[];
+  parent?: ASTNode;
 }
 
 /**
  * Create a complete AST node
  */
 export function createASTNode(options: CreateASTNodeOptions): ASTNode {
-  const {
-    id,
-    type,
-    name,
-    layout = {},
-    styles = {},
-    metadata,
-    children = [],
-    parent,
-  } = options
+  const { id, type, name, layout = {}, styles = {}, metadata, children = [], parent } = options;
 
   return {
     id,
@@ -147,17 +131,13 @@ export function createASTNode(options: CreateASTNodeOptions): ASTNode {
     layout: createLayoutInfo(layout),
     styles: createStyleInfo(styles),
     metadata,
-  }
+  };
 }
 
 /**
  * Create a root AST node
  */
-export function createRootNode(
-  id: string,
-  name: string,
-  figmaId: string
-): ASTNode {
+export function createRootNode(id: string, name: string, figmaId: string): ASTNode {
   return createASTNode({
     id,
     type: 'Root',
@@ -166,7 +146,7 @@ export function createRootNode(
       isComponent: false,
       exportable: false,
     }),
-  })
+  });
 }
 
 /**
@@ -184,7 +164,7 @@ export function createPageNode(
     name,
     metadata: createNodeMetadata(figmaId, 'CANVAS'),
     parent,
-  })
+  });
 }
 
 /**
@@ -205,7 +185,7 @@ export function createContainerNode(
     layout,
     metadata: createNodeMetadata(figmaId, figmaType),
     parent,
-  })
+  });
 }
 
 /**
@@ -227,7 +207,7 @@ export function createComponentNode(
       componentName,
     }),
     parent,
-  })
+  });
 }
 
 /**
@@ -249,7 +229,7 @@ export function createTextNode(
     styles,
     metadata: createNodeMetadata(figmaId, 'TEXT'),
     parent,
-  })
+  });
 }
 
 /**
@@ -269,7 +249,7 @@ export function createImageNode(
     layout,
     metadata: createNodeMetadata(figmaId, 'IMAGE'),
     parent,
-  })
+  });
 }
 
 /**
@@ -292,28 +272,28 @@ export function createShapeNode(
     styles,
     metadata: createNodeMetadata(figmaId, figmaType),
     parent,
-  })
+  });
 }
 
 /**
  * Add a child node to a parent node
  */
 export function addChild(parent: ASTNode, child: ASTNode): void {
-  child.parent = parent
-  parent.children.push(child)
+  child.parent = parent;
+  parent.children.push(child);
 }
 
 /**
  * Remove a child node from a parent node
  */
 export function removeChild(parent: ASTNode, child: ASTNode): boolean {
-  const index = parent.children.indexOf(child)
+  const index = parent.children.indexOf(child);
   if (index !== -1) {
-    parent.children.splice(index, 1)
-    child.parent = undefined
-    return true
+    parent.children.splice(index, 1);
+    child.parent = undefined;
+    return true;
   }
-  return false
+  return false;
 }
 
 /**
@@ -329,11 +309,11 @@ export function cloneNode(node: ASTNode, deep = false): ASTNode {
     metadata: { ...node.metadata },
     children: deep ? node.children.map((child) => cloneNode(child, true)) : [],
     parent: node.parent,
-  })
+  });
 
   if (!deep) {
-    cloned.children = [...node.children]
+    cloned.children = [...node.children];
   }
 
-  return cloned
+  return cloned;
 }

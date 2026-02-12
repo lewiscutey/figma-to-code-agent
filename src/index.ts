@@ -1,10 +1,10 @@
-export const version = '0.2.0'
+export const version = '0.2.0';
 
-export { FigmaToCodeAgent } from './FigmaToCodeAgent'
-export type { AgentConfig } from './FigmaToCodeAgent'
-export { FigmaAPIClient } from './extraction/FigmaAPIClient'
-export { ASTParser } from './transformation/ASTParser'
-export { TransformationPipeline } from './transformation/TransformationPipeline'
-export { ReactGenerator } from './generation/ReactGenerator'
-export { VueGenerator } from './generation/VueGenerator'
-export type { GeneratorConfig, GeneratedFile, CodeGenerator } from './generation/types'
+export { FigmaToCodeAgent } from './FigmaToCodeAgent';
+export type { AgentConfig } from './FigmaToCodeAgent';
+export { FigmaAPIClient } from './extraction/FigmaAPIClient';
+export { ASTParser } from './transformation/ASTParser';
+export { TransformationPipeline } from './transformation/TransformationPipeline';
+export { ReactGenerator } from './generation/ReactGenerator';
+export { VueGenerator } from './generation/VueGenerator';
+export type { GeneratorConfig, GeneratedFile, CodeGenerator } from './generation/types';

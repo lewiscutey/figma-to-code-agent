@@ -1,5 +1,5 @@
-import type { GeneratedFile } from '../generation/types'
-import type { LLMProvider } from '../llm/types'
+import type { GeneratedFile } from '../generation/types';
+import type { LLMProvider } from '../llm/types';
 
 export class AICodeOptimizer {
   constructor(private llm: LLMProvider) {}
@@ -10,7 +10,7 @@ export class AICodeOptimizer {
         ...file,
         content: await this.optimizeCode(file.content, file.path),
       }))
-    )
+    );
   }
 
   private async optimizeCode(code: string, filePath: string): Promise<string> {
@@ -24,13 +24,13 @@ export class AICodeOptimizer {
         role: 'user',
         content: `Optimize this ${filePath}:\n\`\`\`\n${code}\n\`\`\``,
       },
-    ])
+    ]);
 
-    return this.extractCode(response.content)
+    return this.extractCode(response.content);
   }
 
   private extractCode(response: string): string {
-    const match = response.match(/```(?:tsx?|vue)?\n([\s\S]*?)\n```/)
-    return match ? match[1] : response
+    const match = response.match(/```(?:tsx?|vue)?\n([\s\S]*?)\n```/);
+    return match ? match[1] : response;
   }
 }

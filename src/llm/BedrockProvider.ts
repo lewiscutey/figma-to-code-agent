@@ -1,11 +1,11 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
-import type { LLMConfig, LLMMessage, LLMProvider, LLMResponse } from './types'
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import type { LLMConfig, LLMMessage, LLMProvider, LLMResponse } from './types';
 
 export class BedrockProvider implements LLMProvider {
-  private client: BedrockRuntimeClient
+  private client: BedrockRuntimeClient;
 
   constructor(private config: LLMConfig) {
-    this.client = new BedrockRuntimeClient({ region: config.region || 'us-east-1' })
+    this.client = new BedrockRuntimeClient({ region: config.region || 'us-east-1' });
   }
 
   async chat(messages: LLMMessage[]): Promise<LLMResponse> {
@@ -19,10 +19,10 @@ export class BedrockProvider implements LLMProvider {
         temperature: this.config.temperature || 0.7,
         messages: messages.map((m) => ({ role: m.role, content: m.content })),
       }),
-    })
+    });
 
-    const response = await this.client.send(command)
-    const result = JSON.parse(new TextDecoder().decode(response.body))
+    const response = await this.client.send(command);
+    const result = JSON.parse(new TextDecoder().decode(response.body));
 
     return {
       content: result.content[0].text,
@@ -30,6 +30,6 @@ export class BedrockProvider implements LLMProvider {
         inputTokens: result.usage.input_tokens,
         outputTokens: result.usage.output_tokens,
       },
-    }
+    };
   }
 }

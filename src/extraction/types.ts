@@ -108,12 +108,7 @@ export interface LayoutConstraint {
   horizontal: 'LEFT' | 'RIGHT' | 'CENTER' | 'LEFT_RIGHT' | 'SCALE';
 }
 
-export type LayoutAlign =
-  | 'MIN'
-  | 'CENTER'
-  | 'MAX'
-  | 'STRETCH'
-  | 'INHERIT';
+export type LayoutAlign = 'MIN' | 'CENTER' | 'MAX' | 'STRETCH' | 'INHERIT';
 
 export interface Paint {
   type: 'SOLID' | 'GRADIENT_LINEAR' | 'GRADIENT_RADIAL' | 'IMAGE';

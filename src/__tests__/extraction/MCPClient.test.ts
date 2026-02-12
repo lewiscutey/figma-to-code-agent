@@ -2,8 +2,10 @@
  * MCPClient Unit Tests
  */
 
-import { MCPClient, ConnectionStatus, DesignChanges } from '../../extraction/MCPClient';
+import { MCPClient } from '../../extraction/MCPClient';
 import WebSocket from 'ws';
+
+type EventCallback = (...args: unknown[]) => void;
 
 // Mock WebSocket
 jest.mock('ws');
@@ -15,7 +17,7 @@ describe('MCPClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     client = new MCPClient('ws://localhost:9001');
-    
+
     // Create a mock WebSocket instance
     mockWs = {
       on: jest.fn(),
@@ -23,7 +25,7 @@ describe('MCPClient', () => {
       close: jest.fn(),
       readyState: WebSocket.OPEN,
     } as any;
-    
+
     (WebSocket as unknown as jest.Mock).mockImplementation(() => mockWs);
   });
 
@@ -54,9 +56,9 @@ describe('MCPClient', () => {
       const connectPromise = client.connect();
 
       // Simulate successful connection
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
 
       const status = await connectPromise;
@@ -67,9 +69,9 @@ describe('MCPClient', () => {
     it('should return already connected status if already connected', async () => {
       // First connection
       const connectPromise = client.connect();
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
       await connectPromise;
 
@@ -83,9 +85,9 @@ describe('MCPClient', () => {
       const connectPromise = client.connect();
 
       // Simulate connection error
-      const errorHandler = mockWs.on.mock.calls.find(call => call[0] === 'error')?.[1];
+      const errorHandler = mockWs.on.mock.calls.find((call) => call[0] === 'error')?.[1];
       if (errorHandler) {
-        (errorHandler as Function)(new Error('Connection refused'));
+        (errorHandler as EventCallback)(new Error('Connection refused'));
       }
 
       await expect(connectPromise).rejects.toThrow('WebSocket error');
@@ -93,14 +95,14 @@ describe('MCPClient', () => {
 
     it('should timeout if connection takes too long', async () => {
       jest.useFakeTimers();
-      
+
       const connectPromise = client.connect();
 
       // Fast-forward time to trigger timeout
       jest.advanceTimersByTime(10000);
 
       await expect(connectPromise).rejects.toThrow('Connection timeout');
-      
+
       jest.useRealTimers();
     });
   });
@@ -109,9 +111,9 @@ describe('MCPClient', () => {
     beforeEach(async () => {
       // Connect first
       const connectPromise = client.connect();
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
       await connectPromise;
     });
@@ -142,18 +144,18 @@ describe('MCPClient', () => {
       const filePromise = client.getCurrentFile();
 
       // Simulate response
-      const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')?.[1];
+      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')?.[1];
       if (messageHandler) {
         const sendCall = mockWs.send.mock.calls[0];
         const request = JSON.parse(sendCall[0] as string);
-        
+
         const response = {
           id: request.id,
           type: 'response',
           result: mockFile,
         };
-        
-        (messageHandler as Function)(JSON.stringify(response));
+
+        (messageHandler as EventCallback)(JSON.stringify(response));
       }
 
       const file = await filePromise;
@@ -165,11 +167,11 @@ describe('MCPClient', () => {
       const filePromise = client.getCurrentFile();
 
       // Simulate error response
-      const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')?.[1];
+      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')?.[1];
       if (messageHandler) {
         const sendCall = mockWs.send.mock.calls[0];
         const request = JSON.parse(sendCall[0] as string);
-        
+
         const response = {
           id: request.id,
           type: 'response',
@@ -178,8 +180,8 @@ describe('MCPClient', () => {
             message: 'No file is currently open',
           },
         };
-        
-        (messageHandler as Function)(JSON.stringify(response));
+
+        (messageHandler as EventCallback)(JSON.stringify(response));
       }
 
       await expect(filePromise).rejects.toThrow('No file is currently open');
@@ -190,9 +192,9 @@ describe('MCPClient', () => {
     beforeEach(async () => {
       // Connect first
       const connectPromise = client.connect();
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
       await connectPromise;
     });
@@ -216,7 +218,7 @@ describe('MCPClient', () => {
 
       // Verify subscription message was sent
       expect(mockWs.send).toHaveBeenCalled();
-      const sendCall = mockWs.send.mock.calls.find(call => {
+      const sendCall = mockWs.send.mock.calls.find((call) => {
         const msg = JSON.parse(call[0] as string);
         return msg.method === 'figma.watchChanges';
       });
@@ -228,7 +230,7 @@ describe('MCPClient', () => {
       client.watchChanges(callback);
 
       // Simulate change notification
-      const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')?.[1];
+      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')?.[1];
       if (messageHandler) {
         const notification = {
           id: 'notif_1',
@@ -240,8 +242,8 @@ describe('MCPClient', () => {
             timestamp: Date.now(),
           },
         };
-        
-        (messageHandler as Function)(JSON.stringify(notification));
+
+        (messageHandler as EventCallback)(JSON.stringify(notification));
       }
 
       expect(callback).toHaveBeenCalledWith(
@@ -257,9 +259,9 @@ describe('MCPClient', () => {
     it('should close WebSocket connection', async () => {
       // Connect first
       const connectPromise = client.connect();
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
       await connectPromise;
 
@@ -273,9 +275,9 @@ describe('MCPClient', () => {
     it('should unsubscribe from changes before disconnecting', async () => {
       // Connect and watch changes
       const connectPromise = client.connect();
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
       await connectPromise;
 
@@ -299,9 +301,9 @@ describe('MCPClient', () => {
 
     it('should return true when connected', async () => {
       const connectPromise = client.connect();
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
       await connectPromise;
 
@@ -313,9 +315,9 @@ describe('MCPClient', () => {
     beforeEach(async () => {
       // Connect first
       const connectPromise = client.connect();
-      const openHandler = mockWs.on.mock.calls.find(call => call[0] === 'open')?.[1];
+      const openHandler = mockWs.on.mock.calls.find((call) => call[0] === 'open')?.[1];
       if (openHandler) {
-        (openHandler as Function)();
+        (openHandler as EventCallback)();
       }
       await connectPromise;
     });
@@ -345,18 +347,18 @@ describe('MCPClient', () => {
       const filePromise = client.getCurrentFile();
 
       // Simulate response
-      const messageHandler = mockWs.on.mock.calls.find(call => call[0] === 'message')?.[1];
+      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')?.[1];
       if (messageHandler) {
         const sendCall = mockWs.send.mock.calls[0];
         const request = JSON.parse(sendCall[0] as string);
-        
+
         const response = JSON.stringify({
           id: request.id,
           type: 'response',
           result: mockFile,
         });
-        
-        (messageHandler as Function)(response);
+
+        (messageHandler as EventCallback)(response);
       }
 
       const file = await filePromise;

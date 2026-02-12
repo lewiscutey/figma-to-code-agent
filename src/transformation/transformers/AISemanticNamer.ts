@@ -1,27 +1,27 @@
-import type { ASTNode } from '../types'
-import type { Transformer } from '../TransformationPipeline'
-import type { LLMProvider } from '../../llm/types'
+import type { ASTNode } from '../types';
+import type { Transformer } from '../TransformationPipeline';
+import type { LLMProvider } from '../../llm/types';
 
 export class AISemanticNamer implements Transformer {
-  name = 'AISemanticNamer'
+  name = 'AISemanticNamer';
 
   constructor(private llm: LLMProvider) {}
 
   async transform(node: ASTNode): Promise<ASTNode> {
     if (node.type === 'Component' || node.type === 'Container') {
-      const name = await this.generateName(node)
-      node.name = name
+      const name = await this.generateName(node);
+      node.name = name;
     }
 
     if (node.children) {
-      node.children = await Promise.all(node.children.map((child) => this.transform(child)))
+      node.children = await Promise.all(node.children.map((child) => this.transform(child)));
     }
 
-    return node
+    return node;
   }
 
   private async generateName(node: ASTNode): Promise<string> {
-    const context = this.buildContext(node)
+    const context = this.buildContext(node);
     const response = await this.llm.chat([
       {
         role: 'system',
@@ -32,9 +32,9 @@ export class AISemanticNamer implements Transformer {
         role: 'user',
         content: `Generate a component name for:\n${context}`,
       },
-    ])
+    ]);
 
-    return response.content.trim().replace(/[^a-zA-Z0-9]/g, '')
+    return response.content.trim().replace(/[^a-zA-Z0-9]/g, '');
   }
 
   private buildContext(node: ASTNode): string {
@@ -43,15 +43,15 @@ export class AISemanticNamer implements Transformer {
       `Original name: ${node.name}`,
       `Layout: ${node.layout?.display || 'none'}`,
       `Children: ${node.children?.length || 0}`,
-    ]
+    ];
 
     if (node.children?.some((c: ASTNode) => c.type === 'Text')) {
-      parts.push('Contains text')
+      parts.push('Contains text');
     }
     if (node.children?.some((c: ASTNode) => c.type === 'Image')) {
-      parts.push('Contains image')
+      parts.push('Contains image');
     }
 
-    return parts.join('\n')
+    return parts.join('\n');
   }
 }

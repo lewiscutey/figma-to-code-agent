@@ -4,7 +4,7 @@
  */
 
 // Export all types
-export * from './types'
+export * from './types';
 
 // Export factory functions
-export * from './ASTFactory'
+export * from './ASTFactory';

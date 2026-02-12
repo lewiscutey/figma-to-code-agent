@@ -1,5 +1,5 @@
-import axios from 'axios'
-import type { LLMConfig, LLMMessage, LLMProvider, LLMResponse } from './types'
+import axios from 'axios';
+import type { LLMConfig, LLMMessage, LLMProvider, LLMResponse } from './types';
 
 export class OpenAIProvider implements LLMProvider {
   constructor(private config: LLMConfig) {}
@@ -19,7 +19,7 @@ export class OpenAIProvider implements LLMProvider {
           'Content-Type': 'application/json',
         },
       }
-    )
+    );
 
     return {
       content: response.data.choices[0].message.content,
@@ -27,6 +27,6 @@ export class OpenAIProvider implements LLMProvider {
         inputTokens: response.data.usage.prompt_tokens,
         outputTokens: response.data.usage.completion_tokens,
       },
-    }
+    };
   }
 }

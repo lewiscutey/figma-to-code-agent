@@ -1,12 +1,12 @@
-import { ASTParser } from '../../transformation/ASTParser'
-import type { Node as FigmaNode } from '../../extraction/types'
+import { ASTParser } from '../../transformation/ASTParser';
+import type { Node as FigmaNode } from '../../extraction/types';
 
 describe('ASTParser', () => {
-  let parser: ASTParser
+  let parser: ASTParser;
 
   beforeEach(() => {
-    parser = new ASTParser()
-  })
+    parser = new ASTParser();
+  });
 
   describe('parse', () => {
     it('should parse a simple frame node', () => {
@@ -16,15 +16,15 @@ describe('ASTParser', () => {
         type: 'FRAME',
         absoluteBoundingBox: { x: 0, y: 0, width: 100, height: 100 },
         children: [],
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
-      expect(astNode.type).toBe('Container')
-      expect(astNode.name).toBe('Frame')
-      expect(astNode.metadata.figmaId).toBe('1:1')
-      expect(astNode.layout.size).toEqual({ width: 100, height: 100 })
-    })
+      expect(astNode.type).toBe('Container');
+      expect(astNode.name).toBe('Frame');
+      expect(astNode.metadata.figmaId).toBe('1:1');
+      expect(astNode.layout.size).toEqual({ width: 100, height: 100 });
+    });
 
     it('should parse a text node', () => {
       const figmaNode: FigmaNode = {
@@ -39,15 +39,15 @@ describe('ASTParser', () => {
           fontWeight: 400,
           lineHeightPx: 20,
         },
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
-      expect(astNode.type).toBe('Text')
-      expect(astNode.styles.typography).toBeDefined()
-      expect(astNode.styles.typography?.fontFamily).toBe('Arial')
-      expect(astNode.styles.typography?.fontSize).toBe(16)
-    })
+      expect(astNode.type).toBe('Text');
+      expect(astNode.styles.typography).toBeDefined();
+      expect(astNode.styles.typography?.fontFamily).toBe('Arial');
+      expect(astNode.styles.typography?.fontSize).toBe(16);
+    });
 
     it('should parse a component node', () => {
       const figmaNode: FigmaNode = {
@@ -56,14 +56,14 @@ describe('ASTParser', () => {
         type: 'COMPONENT',
         absoluteBoundingBox: { x: 0, y: 0, width: 120, height: 40 },
         children: [],
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
-      expect(astNode.type).toBe('Component')
-      expect(astNode.metadata.isComponent).toBe(true)
-      expect(astNode.metadata.componentName).toBe('Button')
-    })
+      expect(astNode.type).toBe('Component');
+      expect(astNode.metadata.isComponent).toBe(true);
+      expect(astNode.metadata.componentName).toBe('Button');
+    });
 
     it('should parse flex layout', () => {
       const figmaNode: FigmaNode = {
@@ -76,16 +76,16 @@ describe('ASTParser', () => {
         counterAxisAlignItems: 'CENTER',
         itemSpacing: 10,
         children: [],
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
-      expect(astNode.layout.display).toBe('flex')
-      expect(astNode.layout.flexDirection).toBe('row')
-      expect(astNode.layout.justifyContent).toBe('center')
-      expect(astNode.layout.alignItems).toBe('center')
-      expect(astNode.layout.gap).toBe(10)
-    })
+      expect(astNode.layout.display).toBe('flex');
+      expect(astNode.layout.flexDirection).toBe('row');
+      expect(astNode.layout.justifyContent).toBe('center');
+      expect(astNode.layout.alignItems).toBe('center');
+      expect(astNode.layout.gap).toBe(10);
+    });
 
     it('should parse nested nodes', () => {
       const figmaNode: FigmaNode = {
@@ -109,15 +109,15 @@ describe('ASTParser', () => {
             children: [],
           },
         ],
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
-      expect(astNode.children).toHaveLength(2)
-      expect(astNode.children[0].name).toBe('Child1')
-      expect(astNode.children[1].name).toBe('Child2')
-      expect(astNode.children[0].parent).toBe(astNode)
-    })
+      expect(astNode.children).toHaveLength(2);
+      expect(astNode.children[0].name).toBe('Child1');
+      expect(astNode.children[1].name).toBe('Child2');
+      expect(astNode.children[0].parent).toBe(astNode);
+    });
 
     it('should parse background color', () => {
       const figmaNode: FigmaNode = {
@@ -133,17 +133,17 @@ describe('ASTParser', () => {
           },
         ],
         children: [],
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
       expect(astNode.styles.backgroundColor).toEqual({
         r: 255,
         g: 0,
         b: 0,
         a: 0.8,
-      })
-    })
+      });
+    });
 
     it('should parse border radius', () => {
       const figmaNode: FigmaNode = {
@@ -153,12 +153,12 @@ describe('ASTParser', () => {
         absoluteBoundingBox: { x: 0, y: 0, width: 100, height: 100 },
         cornerRadius: 8,
         children: [],
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
-      expect(astNode.styles.borderRadius).toBe(8)
-    })
+      expect(astNode.styles.borderRadius).toBe(8);
+    });
 
     it('should parse padding', () => {
       const figmaNode: FigmaNode = {
@@ -171,16 +171,16 @@ describe('ASTParser', () => {
         paddingBottom: 10,
         paddingLeft: 15,
         children: [],
-      }
+      };
 
-      const astNode = parser.parse(figmaNode)
+      const astNode = parser.parse(figmaNode);
 
       expect(astNode.layout.padding).toEqual({
         top: 10,
         right: 15,
         bottom: 10,
         left: 15,
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

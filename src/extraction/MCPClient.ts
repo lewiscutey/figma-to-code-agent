@@ -34,18 +34,19 @@ export class MCPClient {
   private ws: WebSocket | null = null;
   private connected = false;
   private messageId = 0;
-  private pendingRequests = new Map<string, {
-    resolve: (value: any) => void;
-    reject: (error: Error) => void;
-  }>();
+  private pendingRequests = new Map<
+    string,
+    {
+      resolve: (value: any) => void;
+      reject: (error: Error) => void;
+    }
+  >();
   private changeCallbacks: Array<(changes: DesignChanges) => void> = [];
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
   private readonly reconnectDelay = 2000; // milliseconds
 
-  constructor(
-    private readonly wsUrl: string = 'ws://localhost:9001'
-  ) {
+  constructor(private readonly wsUrl: string = 'ws://localhost:9001') {
     if (!wsUrl) {
       throw new Error('WebSocket URL is required');
     }
@@ -115,7 +116,7 @@ export class MCPClient {
 
     try {
       const response = await this.sendRequest('figma.getCurrentFile', {});
-      
+
       if (!response || !response.document) {
         throw new Error('Invalid response: missing document data');
       }
@@ -143,10 +144,9 @@ export class MCPClient {
 
     // Subscribe to changes if this is the first callback
     if (this.changeCallbacks.length === 1) {
-      this.sendNotification('figma.watchChanges', { enabled: true })
-        .catch((error) => {
-          console.error('Failed to subscribe to changes:', error);
-        });
+      this.sendNotification('figma.watchChanges', { enabled: true }).catch((error) => {
+        console.error('Failed to subscribe to changes:', error);
+      });
     }
   }
 
@@ -157,10 +157,9 @@ export class MCPClient {
     if (this.ws) {
       // Unsubscribe from changes
       if (this.changeCallbacks.length > 0) {
-        this.sendNotification('figma.watchChanges', { enabled: false })
-          .catch((error) => {
-            console.error('Failed to unsubscribe from changes:', error);
-          });
+        this.sendNotification('figma.watchChanges', { enabled: false }).catch((error) => {
+          console.error('Failed to unsubscribe from changes:', error);
+        });
       }
 
       this.ws.close();
@@ -238,7 +237,7 @@ export class MCPClient {
         const pending = this.pendingRequests.get(message.id);
         if (pending) {
           this.pendingRequests.delete(message.id);
-          
+
           if (message.error) {
             pending.reject(new Error(message.error.message));
           } else {
@@ -270,7 +269,9 @@ export class MCPClient {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       setTimeout(() => {
-        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+        console.log(
+          `Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`
+        );
         this.connect().catch((error) => {
           console.error('Reconnection failed:', error);
         });

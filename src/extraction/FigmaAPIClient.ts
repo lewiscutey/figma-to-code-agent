@@ -17,12 +17,15 @@ export class FigmaAPIClient {
   private readonly cache: FigmaCache;
   private readonly cacheMaxAge = 24 * 60 * 60 * 1000; // 24 hours (increased from 5 minutes)
 
-  constructor(private readonly accessToken: string, enableCache = true) {
+  constructor(
+    private readonly accessToken: string,
+    enableCache = true
+  ) {
     if (!accessToken) {
       throw new Error('Figma access token is required');
     }
 
-    this.cache = enableCache ? new FigmaCache() : null as any;
+    this.cache = enableCache ? new FigmaCache() : (null as any);
 
     this.axiosInstance = axios.create({
       baseURL: this.baseURL,
@@ -39,10 +42,7 @@ export class FigmaAPIClient {
    * @param options - Optional query parameters
    * @returns Design file data
    */
-  async getFile(
-    fileKey: string,
-    options?: GetFileOptions
-  ): Promise<FigmaFile> {
+  async getFile(fileKey: string, options?: GetFileOptions): Promise<FigmaFile> {
     if (!fileKey) {
       throw new Error('File key is required');
     }
@@ -111,16 +111,13 @@ export class FigmaAPIClient {
 
     try {
       const response = await this.retryRequest(async () => {
-        return await this.axiosInstance.get<ImageMap>(
-          `/images/${fileKey}`,
-          {
-            params: {
-              ids: nodeIds.join(','),
-              format,
-              scale: 2,
-            },
-          }
-        );
+        return await this.axiosInstance.get<ImageMap>(`/images/${fileKey}`, {
+          params: {
+            ids: nodeIds.join(','),
+            format,
+            scale: 2,
+          },
+        });
       });
 
       if (response.data.err) {
@@ -194,28 +191,28 @@ export class FigmaAPIClient {
       if (retries > 0 && this.isRetryableError(error)) {
         // Check for Retry-After header (429 rate limit)
         let delay = this.baseRetryDelay * (this.maxRetries - retries + 1);
-        
+
         if (axios.isAxiosError(error) && error.response?.status === 429) {
           const retryAfter = error.response.headers['retry-after'];
           if (retryAfter) {
             const retryAfterSeconds = parseInt(retryAfter);
             const retryAfterMs = retryAfterSeconds * 1000;
-            
+
             // If rate limit is more than 1 minute, don't retry
             if (retryAfterSeconds > 60) {
               const hours = Math.floor(retryAfterSeconds / 3600);
               const minutes = Math.floor((retryAfterSeconds % 3600) / 60);
               throw new Error(
                 `Figma API rate limit exceeded. Please try again in ${hours}h ${minutes}m. ` +
-                `Tip: Use a different Figma token or wait for the rate limit to reset.`
+                  `Tip: Use a different Figma token or wait for the rate limit to reset.`
               );
             }
-            
+
             delay = retryAfterMs;
             console.log(`Rate limited. Waiting ${retryAfterSeconds}s before retry...`);
           }
         }
-        
+
         await this.sleep(delay);
         return this.retryRequest(requestFn, retries - 1);
       }
@@ -255,9 +252,7 @@ export class FigmaAPIClient {
 
       // Authentication error
       if (axiosError.response?.status === 403) {
-        return new Error(
-          'Authentication failed. Please check your Figma access token.'
-        );
+        return new Error('Authentication failed. Please check your Figma access token.');
       }
 
       // Not found error
@@ -269,9 +264,7 @@ export class FigmaAPIClient {
 
       // Rate limit error
       if (axiosError.response?.status === 429) {
-        return new Error(
-          'Rate limit exceeded. Please try again later.'
-        );
+        return new Error('Rate limit exceeded. Please try again later.');
       }
 
       // Other API errors
@@ -283,9 +276,7 @@ export class FigmaAPIClient {
 
       // Network errors
       if (axiosError.request) {
-        return new Error(
-          `${message}: Network error. Please check your internet connection.`
-        );
+        return new Error(`${message}: Network error. Please check your internet connection.`);
       }
     }
 
