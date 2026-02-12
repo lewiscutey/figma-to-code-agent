@@ -3,8 +3,6 @@
 Convert Figma designs to production-ready React/Vue components. Supports CSS Modules, Tailwind, and plain CSS.
 
 > 📖 New here? Check the [Quick Start Guide](QUICKSTART.md) for step-by-step setup.
->
-> 🖥️ Want to see it in action? Run the examples in [test-app/](test-app/) — pre-generated React and Vue components ready to preview.
 
 ## Examples
 
@@ -43,14 +41,23 @@ Convert Figma designs to production-ready React/Vue components. Supports CSS Mod
 - 👁️ Figma layer filtering (hidden layers, mask shapes)
 - 🤖 Optional AI enhancements (semantic naming, component splitting, code optimization)
 
+## Install
+
+```bash
+npm install -g figma-to-code-agent
+```
+
+Or use directly with npx (no install needed):
+
+```bash
+npx figma-to-code --token YOUR_FIGMA_TOKEN --file FILE_KEY --node NODE_ID --output ./output
+```
+
 ## Quick Start
 
 ```bash
-npm install
-npm run build
-
 # Generate React component
-node dist/cli.js \
+npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file FILE_KEY \
   --node NODE_ID \
@@ -58,7 +65,7 @@ node dist/cli.js \
   --output ./output
 
 # Generate and preview in browser
-node dist/cli.js \
+npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file FILE_KEY \
   --node NODE_ID \
@@ -133,6 +140,9 @@ src/
 ## Development
 
 ```bash
+git clone https://github.com/lewiscutey/figma-to-code-agent.git
+cd figma-to-code-agent
+npm install
 npm run build        # Compile TypeScript
 npm test             # Run all tests (129 tests)
 npm run lint         # ESLint

@@ -1,13 +1,12 @@
 # Quick Start
 
-## 1. Install & Build
+## 1. Install
 
 ```bash
-git clone https://github.com/lewiscutey/figma-to-code-agent.git
-cd figma-to-code-agent
-npm install
-npm run build
+npm install -g figma-to-code-agent
 ```
+
+Or skip install and use `npx figma-to-code` directly.
 
 ## 2. Get Your Figma Token
 
@@ -31,7 +30,7 @@ Node ID format: `100-200` (use hyphen, not colon)
 
 ```bash
 # React component
-node dist/cli.js \
+npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -39,7 +38,7 @@ node dist/cli.js \
   --output ./output
 
 # Vue component
-node dist/cli.js \
+npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -51,7 +50,7 @@ Or use environment variable:
 
 ```bash
 export FIGMA_TOKEN="your-token"
-node dist/cli.js --file ABC123DEF456 --node 100-200 --output ./output
+npx figma-to-code --file ABC123DEF456 --node 100-200 --output ./output
 ```
 
 ## 5. Preview in Browser
@@ -59,7 +58,7 @@ node dist/cli.js --file ABC123DEF456 --node 100-200 --output ./output
 Add `--preview` to instantly open the result in your browser:
 
 ```bash
-node dist/cli.js \
+npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -75,7 +74,7 @@ This copies the generated files to the built-in test app, starts a Vite dev serv
 By default, generates `.jsx` / `.vue`. Add `--typescript` for `.tsx` output:
 
 ```bash
-node dist/cli.js \
+npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -128,7 +127,7 @@ For smarter component naming and code optimization, add an LLM provider:
 
 ```bash
 # AWS Bedrock
-node dist/cli.js \
+npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --framework react \
@@ -138,7 +137,7 @@ node dist/cli.js \
   --output ./output
 
 # OpenAI
-LLM_API_KEY="sk-..." node dist/cli.js \
+LLM_API_KEY="sk-..." npx figma-to-code \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --framework react \
@@ -166,33 +165,4 @@ The tool auto-retries with backoff. If persistent, wait a minute and try again. 
 Check that the `assets/` folder was generated alongside your component. Image paths are relative imports.
 
 **Preview not working**
-Make sure `test-app/test-react/node_modules` (or `test-vue`) exists. Run `npm install` inside the test-app directory first:
-```bash
-cd test-app/test-react && npm install
-```
-
-## Try the Pre-built Examples
-
-The `test-app/` directory contains pre-generated components from the 4 examples shown in the README. You can preview them directly without a Figma token:
-
-```bash
-# React examples
-cd test-app/test-react
-npm install
-npx vite --open
-
-# Vue examples
-cd test-app/test-vue
-npm install
-npx vite --open
-```
-
-Edit `src/main.jsx` (or `src/main.js` for Vue) to switch between components:
-
-```jsx
-// Try different pages:
-import { Component } from './Component.jsx'     // MIUI12
-import { Homepage } from './Homepage.jsx'        // World Peas Homepage
-import { ShoppingCart } from './ShoppingCart.jsx' // Shopping Cart
-import { ProductPage } from './ProductPage.jsx'  // Product Page
-```
+The `--preview` flag requires the built-in test-app. If installed globally, it should work out of the box. If using npx, the test-app is included in the package.

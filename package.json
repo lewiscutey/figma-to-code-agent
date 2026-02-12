@@ -7,13 +7,34 @@
   "bin": {
     "figma-to-code": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "test-app/test-react/src/**/*.{jsx,css}",
+    "test-app/test-react/src/main.jsx",
+    "test-app/test-react/index.html",
+    "test-app/test-react/vite.config.js",
+    "test-app/test-react/package.json",
+    "test-app/test-vue/src/**/*.{vue,js}",
+    "test-app/test-vue/src/main.js",
+    "test-app/test-vue/index.html",
+    "test-app/test-vue/vite.config.js",
+    "test-app/test-vue/package.json",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "QUICKSTART.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
     "figma",
