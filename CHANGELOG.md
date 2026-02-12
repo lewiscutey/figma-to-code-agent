@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.4] - 2026-02-12
+
+### Fixed
+- Deduplicate image imports when multiple nodes reference the same image file
+
 ## [0.3.3] - 2026-02-12
 
 ### Fixed

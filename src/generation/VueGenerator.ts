@@ -136,7 +136,10 @@ ${this.indent(children, 1)}
 
     imports.push(`import { ref, onMounted, onUnmounted } from 'vue'`);
 
+    const importedVars = new Set<string>();
     for (const [nodeId, varName] of this.imageImportMap) {
+      if (importedVars.has(varName)) continue;
+      importedVars.add(varName);
       const imgNode = this.findNodeById(node, nodeId);
       if (imgNode && imgNode.metadata.imageRef) {
         imports.push(`import ${varName} from '${imgNode.metadata.imageRef}'`);

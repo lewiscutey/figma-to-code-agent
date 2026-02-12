@@ -75,9 +75,11 @@ export class ReactGenerator implements CodeGenerator {
       imports.push(`import styles from './${this.toFileName(node.name)}.module.css'`);
     }
 
-    // Add image imports
+    // Add image imports (deduplicate by variable name)
+    const importedVars = new Set<string>();
     for (const [_nodeId, varName] of this.imageImportMap) {
-      // Find the image path from the node
+      if (importedVars.has(varName)) continue;
+      importedVars.add(varName);
       const imgNode = this.findNodeById(node, _nodeId);
       if (imgNode && imgNode.metadata.imageRef) {
         imports.push(`import ${varName} from '${imgNode.metadata.imageRef}'`);
