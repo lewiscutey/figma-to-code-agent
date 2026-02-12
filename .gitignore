@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.env
+.env.local
+*.tsbuildinfo
+output/
+.kiro/
+spec/
+.vscode/
+.figma-cache/
+TEST_PROJECTS.md
+READY_FOR_GITHUB.md

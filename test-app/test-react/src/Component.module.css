@@ -1,0 +1,572 @@
+.responsive-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+.scale-container {
+  width: 1920px;
+  height: 1080px;
+  transform-origin: top left;
+}
+
+.element {
+  position: relative;
+  background-color: rgba(0, 0, 0, 1);
+}
+
+.group2526 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.text {
+  position: absolute;
+  left: 385px;
+  top: 280px;
+  width: 360px;
+  height: 239px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 180px;
+  font-weight: 300;
+  line-height: 239px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.miui-miui12 {
+  position: absolute;
+  left: 396px;
+  top: 788px;
+  width: 700px;
+  height: 58px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 29px;
+  text-align: justified;
+  color: rgba(255, 255, 255, 0.699999988079071);
+}
+
+.miui12 {
+  position: absolute;
+  left: 396px;
+  top: 643px;
+  width: 416px;
+  height: 129px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 43px;
+  letter-spacing: 2px;
+  text-align: left;
+  color: rgba(255, 255, 255, 1);
+}
+
+.rectangle28 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 1920px;
+  height: 1080px;
+  background-color: rgba(0, 0, 0, 0.4000000059604645);
+}
+
+.group2523 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.mask-group {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.mask-group-1 {
+  position: absolute;
+  left: 50px;
+  top: 425px;
+  width: 597px;
+  height: 597px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.mars-methane2 {
+  position: absolute;
+  left: -202px;
+  top: -22px;
+  width: 969px;
+  height: 640px;
+  object-fit: cover;
+  display: block;
+}
+
+.rectangle30 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  background-color: rgba(0, 0, 0, 0.30000001192092896);
+}
+
+.text-1 {
+  position: absolute;
+  left: 70px;
+  top: 250px;
+  width: 104px;
+  height: 440px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 100px;
+  font-weight: 300;
+  line-height: 110px;
+  text-align: left;
+  color: rgba(255, 255, 255, 1);
+}
+
+.group2512 {
+  position: absolute;
+  left: 70px;
+  top: 946px;
+  width: 26px;
+  height: 46px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.element-1 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 26px;
+  height: 34px;
+  font-family: 'Mitype', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.rectangle38 {
+  position: absolute;
+  left: 2px;
+  top: 44px;
+  width: 14px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.group2527 {
+  position: absolute;
+  left: 384px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.text-2 {
+  position: absolute;
+  left: 70px;
+  top: 250px;
+  width: 104px;
+  height: 440px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 100px;
+  font-weight: 300;
+  line-height: 110px;
+  text-align: left;
+  color: rgba(255, 255, 255, 1);
+}
+
+.group2512-1 {
+  position: absolute;
+  left: 70px;
+  top: 946px;
+  width: 30px;
+  height: 46px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.element-2 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 30px;
+  height: 34px;
+  opacity: 0.5;
+  font-family: 'Mitype', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.rectangle38-1 {
+  position: absolute;
+  left: 2px;
+  top: 44px;
+  width: 14px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 1);
+  opacity: 0.4000000059604645;
+}
+
+.group2528 {
+  position: absolute;
+  left: 768px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.mask-group-2 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  object-fit: cover;
+  display: block;
+}
+
+.text-3 {
+  position: absolute;
+  left: 70px;
+  top: 250px;
+  width: 104px;
+  height: 440px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 100px;
+  font-weight: 300;
+  line-height: 110px;
+  text-align: left;
+  color: rgba(255, 255, 255, 1);
+}
+
+.group2512-2 {
+  position: absolute;
+  left: 70px;
+  top: 946px;
+  width: 30px;
+  height: 46px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.element-3 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 30px;
+  height: 34px;
+  font-family: 'Mitype', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.rectangle38-2 {
+  position: absolute;
+  left: 2px;
+  top: 44px;
+  width: 14px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.group2529 {
+  position: absolute;
+  left: 1152px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.text-4 {
+  position: absolute;
+  left: 70px;
+  top: 250px;
+  width: 104px;
+  height: 440px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 100px;
+  font-weight: 300;
+  line-height: 110px;
+  text-align: left;
+  color: rgba(255, 255, 255, 1);
+}
+
+.group2512-3 {
+  position: absolute;
+  left: 70px;
+  top: 946px;
+  width: 31px;
+  height: 46px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.element-4 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 31px;
+  height: 34px;
+  opacity: 0.5;
+  font-family: 'Mitype', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.rectangle38-3 {
+  position: absolute;
+  left: 2px;
+  top: 44px;
+  width: 14px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 1);
+  opacity: 0.4000000059604645;
+}
+
+.group2530 {
+  position: absolute;
+  left: 1536px;
+  top: 0px;
+  width: 384px;
+  height: 1080px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.text-5 {
+  position: absolute;
+  left: 70px;
+  top: 250px;
+  width: 104px;
+  height: 440px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 100px;
+  font-weight: 300;
+  line-height: 110px;
+  text-align: left;
+  color: rgba(255, 255, 255, 1);
+}
+
+.group2512-4 {
+  position: absolute;
+  left: 70px;
+  top: 946px;
+  width: 30px;
+  height: 46px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.element-5 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 30px;
+  height: 34px;
+  opacity: 0.5;
+  font-family: 'Mitype', sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.rectangle38-4 {
+  position: absolute;
+  left: 2px;
+  top: 44px;
+  width: 14px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 1);
+  opacity: 0.4000000059604645;
+}
+
+.group2608 {
+  position: absolute;
+  left: 384px;
+  top: 0px;
+  width: 1153px;
+  height: 1080px;
+  object-fit: cover;
+  display: block;
+}
+
+.group2524 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 1920px;
+  height: 170px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.rectangle44 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 1920px;
+  height: 170px;
+  background-color: rgba(0, 0, 0, 1);
+}
+
+.group {
+  position: absolute;
+  left: 396px;
+  top: 80px;
+  width: 70px;
+  height: 16px;
+  object-fit: cover;
+  display: block;
+}
+
+.group9 {
+  position: absolute;
+  left: 940px;
+  top: 75px;
+  width: 488px;
+  height: 21px;
+  overflow: hidden;
+  background-color: inherit;
+}
+
+.text-6 {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 32px;
+  height: 21px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.text-7 {
+  position: absolute;
+  left: 72px;
+  top: 0px;
+  width: 32px;
+  height: 21px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.text-8 {
+  position: absolute;
+  left: 144px;
+  top: 0px;
+  width: 48px;
+  height: 21px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: left;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.text-9 {
+  position: absolute;
+  left: 424px;
+  top: 0px;
+  width: 64px;
+  height: 21px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: right;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.text-10 {
+  position: absolute;
+  left: 336px;
+  top: 0px;
+  width: 48px;
+  height: 21px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: right;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.text-11 {
+  position: absolute;
+  left: 232px;
+  top: 0px;
+  width: 64px;
+  height: 21px;
+  font-family: 'MI Lan Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: right;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 1);
+}
+
+.group10 {
+  position: absolute;
+  left: 1504px;
+  top: 76px;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
