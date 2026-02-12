@@ -13,7 +13,7 @@ async function main() {
 Figma-to-Code AI Agent
 
 Usage:
-  figma-to-code --token <token> --file <fileKey> [options]
+  figma-to-code-agent --token <token> --file <fileKey> [options]
 
 Options:
   --token <token>       Figma API token (required)
@@ -38,8 +38,8 @@ Options:
   --help                Show this help message
 
 Example:
-  figma-to-code --token abc123 --file xyz789 --framework react --output ./src/components
-  figma-to-code --token abc123 --file xyz789 --framework react --preview
+  figma-to-code-agent --token abc123 --file xyz789 --framework react --output ./src/components
+  figma-to-code-agent --token abc123 --file xyz789 --framework react --preview
     `);
     process.exit(0);
   }

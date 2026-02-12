@@ -6,7 +6,7 @@
 npm install -g figma-to-code-agent
 ```
 
-Or skip install and use `npx figma-to-code` directly.
+Or skip install and use `npx figma-to-code-agent` directly.
 
 ## 2. Get Your Figma Token
 
@@ -30,7 +30,7 @@ Node ID format: `100-200` (use hyphen, not colon)
 
 ```bash
 # React component
-npx figma-to-code \
+npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -38,7 +38,7 @@ npx figma-to-code \
   --output ./output
 
 # Vue component
-npx figma-to-code \
+npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -50,7 +50,7 @@ Or use environment variable:
 
 ```bash
 export FIGMA_TOKEN="your-token"
-npx figma-to-code --file ABC123DEF456 --node 100-200 --output ./output
+npx figma-to-code-agent --file ABC123DEF456 --node 100-200 --output ./output
 ```
 
 ## 5. Preview in Browser
@@ -58,7 +58,7 @@ npx figma-to-code --file ABC123DEF456 --node 100-200 --output ./output
 Add `--preview` to instantly open the result in your browser:
 
 ```bash
-npx figma-to-code \
+npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -74,7 +74,7 @@ This copies the generated files to the built-in test app, starts a Vite dev serv
 By default, generates `.jsx` / `.vue`. Add `--typescript` for `.tsx` output:
 
 ```bash
-npx figma-to-code \
+npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --node 100-200 \
@@ -127,7 +127,7 @@ For smarter component naming and code optimization, add an LLM provider:
 
 ```bash
 # AWS Bedrock
-npx figma-to-code \
+npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --framework react \
@@ -137,7 +137,7 @@ npx figma-to-code \
   --output ./output
 
 # OpenAI
-LLM_API_KEY="sk-..." npx figma-to-code \
+LLM_API_KEY="sk-..." npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file ABC123DEF456 \
   --framework react \

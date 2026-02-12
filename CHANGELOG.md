@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] - 2026-02-12
+
+### Fixed
+- Rename CLI bin from `figma-to-code` to `figma-to-code-agent` to avoid npm naming conflict
+- Update all docs and help text to use `npx figma-to-code-agent`
+
 ## [0.3.1] - 2026-02-12
 
 ### Changed

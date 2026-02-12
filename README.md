@@ -50,14 +50,14 @@ npm install -g figma-to-code-agent
 Or use directly with npx (no install needed):
 
 ```bash
-npx figma-to-code --token YOUR_FIGMA_TOKEN --file FILE_KEY --node NODE_ID --output ./output
+npx figma-to-code-agent --token YOUR_FIGMA_TOKEN --file FILE_KEY --node NODE_ID --output ./output
 ```
 
 ## Quick Start
 
 ```bash
 # Generate React component
-npx figma-to-code \
+npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file FILE_KEY \
   --node NODE_ID \
@@ -65,7 +65,7 @@ npx figma-to-code \
   --output ./output
 
 # Generate and preview in browser
-npx figma-to-code \
+npx figma-to-code-agent \
   --token YOUR_FIGMA_TOKEN \
   --file FILE_KEY \
   --node NODE_ID \
