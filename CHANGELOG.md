@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1] - 2026-02-12
+
+### Changed
+- Update README and QUICKSTART for npm package usage (`npx figma-to-code`)
+- Add `files`, `engines`, `prepublishOnly` to package.json for cleaner npm publish
+- Fix all 62 ESLint errors and warnings
+
 ## [0.3.0] - 2026-02-12
 
 ### Added
