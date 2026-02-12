@@ -210,6 +210,17 @@ createApp(${componentName}).mount('#app')
   }
 
   console.log(`✓ Copied files to ${testAppDir}`);
+
+  // Install dependencies if node_modules doesn't exist
+  const nodeModulesDir = path.join(testAppDir, 'node_modules');
+  if (!fs.existsSync(nodeModulesDir)) {
+    console.log('📦 Installing dependencies...');
+    const installResult = spawn('npm', ['install'], { cwd: testAppDir, stdio: 'inherit', shell: true });
+    await new Promise<void>((resolve, reject) => {
+      installResult.on('close', (code) => code === 0 ? resolve() : reject(new Error(`npm install failed with code ${code}`)));
+    });
+  }
+
   console.log(`✓ Starting Vite dev server...\n`);
 
   // Launch Vite with --open

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.3] - 2026-02-12
+
+### Fixed
+- Auto `npm install` in test-app before preview when dependencies are missing (npx usage)
+
 ## [0.3.2] - 2026-02-12
 
 ### Fixed
