@@ -1,11 +1,9 @@
 /**
  * Property-based tests for Figma API Client
- * Feature: figma-to-code-agent, Property 1: Figma API 数据完整性
- * Validates: Requirements 1.1, 1.3
- *
- * Property 1: For any valid Figma file ID, data extracted via the Figma API
- * should contain a complete document node tree where every node has id, name,
- * type, and children properties.
+ * Feature: figma-to-code-agent
+ * Property 1: Figma API 数据完整性 - Validates: Requirements 1.1, 1.3
+ * Property 3: 组件识别完整性 - Validates: Requirements 1.4
+ * Property 4: 图像资源提取 - Validates: Requirements 1.5
  */
 
 import * as fc from 'fast-check';
@@ -121,6 +119,111 @@ describe('FigmaAPIClient Property Tests', () => {
 
         // All component/instance nodes must be preserved
         expect(outputComponents).toBe(inputComponents);
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * Feature: figma-to-code-agent, Property 3: 组件识别完整性
+   * For any design file containing Figma components, the extracted data should
+   * contain all component definitions (COMPONENT nodes) and all their instances
+   * (INSTANCE nodes).
+   */
+  it('Property 3: all COMPONENT definitions and INSTANCE nodes are preserved in extraction', async () => {
+    // Arbitrary that guarantees at least one COMPONENT and one INSTANCE node
+    const componentNodeArb: fc.Arbitrary<Node> = fc.record({
+      id: fc.stringMatching(/^[0-9]+:[0-9]+$/),
+      name: fc.string({ minLength: 1, maxLength: 20 }),
+      type: fc.constant('COMPONENT' as NodeType),
+      visible: fc.constant(true),
+      children: fc.array(leafNodeArb, { minLength: 0, maxLength: 3 }),
+    });
+
+    const instanceNodeArb: fc.Arbitrary<Node> = fc.record({
+      id: fc.stringMatching(/^[0-9]+:[0-9]+$/),
+      name: fc.string({ minLength: 1, maxLength: 20 }),
+      type: fc.constant('INSTANCE' as NodeType),
+      visible: fc.constant(true),
+      componentId: fc.stringMatching(/^[0-9]+:[0-9]+$/),
+      children: fc.constant([] as Node[]),
+    });
+
+    const fileWithComponentsArb: fc.Arbitrary<FigmaFile> = fc.tuple(
+      fc.array(componentNodeArb, { minLength: 1, maxLength: 5 }),
+      fc.array(instanceNodeArb, { minLength: 1, maxLength: 5 }),
+      fc.array(figmaNodeArb, { minLength: 0, maxLength: 3 }),
+    ).map(([components, instances, others]) => ({
+      name: 'Component File',
+      lastModified: new Date().toISOString(),
+      version: '1.0',
+      document: {
+        id: '0:0',
+        name: 'Document',
+        type: 'DOCUMENT' as NodeType,
+        children: [...components, ...instances, ...others],
+      },
+      components: {},
+      styles: {},
+    }));
+
+    await fc.assert(
+      fc.asyncProperty(fileWithComponentsArb, async (mockFile) => {
+        const { client, mockGet } = createClient();
+        mockGet.mockResolvedValue({ data: mockFile });
+
+        const result = await client.getFile('test-file-key');
+
+        const inputComponentCount = countTypes(mockFile.document, ['COMPONENT']);
+        const inputInstanceCount = countTypes(mockFile.document, ['INSTANCE']);
+        const outputComponentCount = countTypes(result.document, ['COMPONENT']);
+        const outputInstanceCount = countTypes(result.document, ['INSTANCE']);
+
+        // Must have at least 1 of each (guaranteed by arbitrary)
+        expect(inputComponentCount).toBeGreaterThanOrEqual(1);
+        expect(inputInstanceCount).toBeGreaterThanOrEqual(1);
+
+        // All must be preserved
+        expect(outputComponentCount).toBe(inputComponentCount);
+        expect(outputInstanceCount).toBe(inputInstanceCount);
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  /**
+   * Feature: figma-to-code-agent, Property 4: 图像资源提取
+   * For any design file containing image nodes, the system should return image
+   * URLs for all requested node IDs, and the count of returned URLs should equal
+   * the number of image nodes requested.
+   */
+  it('Property 4: getImages returns URLs for all requested image node IDs', async () => {
+    const nodeIdArb = fc.stringMatching(/^[0-9]+:[0-9]+$/);
+    const nodeIdsArb = fc.array(nodeIdArb, { minLength: 1, maxLength: 10 });
+
+    await fc.assert(
+      fc.asyncProperty(nodeIdsArb, async (nodeIds) => {
+        const { client, mockGet } = createClient();
+
+        // Build a mock response where every nodeId has an image URL
+        const images: Record<string, string> = {};
+        for (const id of nodeIds) {
+          images[id] = `https://figma-images.example.com/${id.replace(':', '-')}.png`;
+        }
+
+        mockGet.mockResolvedValue({ data: { images } });
+
+        const result = await client.getImages('test-file-key', nodeIds, 'png');
+
+        // Every requested node ID should have a corresponding image URL
+        for (const id of nodeIds) {
+          expect(result.images[id]).toBeDefined();
+          expect(typeof result.images[id]).toBe('string');
+          expect(result.images[id].length).toBeGreaterThan(0);
+        }
+
+        // Number of returned URLs should equal number of requested IDs
+        expect(Object.keys(result.images).length).toBe(nodeIds.length);
       }),
       { numRuns: 100 }
     );
