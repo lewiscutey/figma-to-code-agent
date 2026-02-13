@@ -3,4 +3,11 @@
  * Ensures generated code matches original design
  */
 
-export {};
+export { VisualValidator } from './VisualValidator';
+export type {
+  Viewport,
+  ValidationConfig,
+  ValidationResult,
+  ComparisonResult,
+  Difference,
+} from './VisualValidator';

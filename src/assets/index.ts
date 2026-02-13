@@ -3,4 +3,5 @@
  * Handles images and static resources
  */
 
-export {};
+export { AssetManager } from './AssetManager';
+export type { Asset, AssetManifest, OptimizationOptions } from './AssetManager';

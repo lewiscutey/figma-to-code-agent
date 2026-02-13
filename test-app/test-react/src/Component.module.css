@@ -563,10 +563,10 @@
 
 .group10 {
   position: absolute;
-  left: 1504px;
-  top: 76px;
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
+  left: 1500px;
+  top: 72px;
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
   display: block;
 }
