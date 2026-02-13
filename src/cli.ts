@@ -23,6 +23,7 @@ Options:
   --style <mode>        Style mode: css-modules, tailwind, or css (default: css-modules)
   --typescript          Enable TypeScript output (default: false)
   --output <dir>        Output directory (default: ./output)
+  --extract-tokens <fmt> Extract design tokens: css, scss, json, js
   --preview             Preview in browser after generation
 
   AI Options:
@@ -54,6 +55,7 @@ Example:
     styleMode: (getArg('--style', args) || 'css-modules') as 'css-modules' | 'tailwind' | 'css',
     typescript: args.includes('--typescript'),
     outputDir: getArg('--output', args) || './output',
+    extractTokens: getArg('--extract-tokens', args) as 'css' | 'scss' | 'json' | 'js' | undefined,
     llm: getArg('--llm-provider', args)
       ? {
           provider: getArg('--llm-provider', args) as 'bedrock' | 'openai' | 'anthropic',

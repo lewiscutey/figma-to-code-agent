@@ -13,6 +13,9 @@ import { LLMFactory, type LLMProvider } from './llm';
 import { AISemanticNamer } from './transformation/transformers/AISemanticNamer';
 import { AIComponentSplitter } from './transformation/transformers/AIComponentSplitter';
 import { AICodeOptimizer } from './generation/AICodeOptimizer';
+import { DesignTokenExtractor } from './tokens/DesignTokenExtractor';
+import { DesignTokenExporter } from './tokens/DesignTokenExporter';
+import type { TokenExportFormat } from './tokens/types';
 
 export interface AgentConfig {
   figmaToken: string;
@@ -22,6 +25,7 @@ export interface AgentConfig {
   styleMode: 'css-modules' | 'tailwind' | 'css';
   typescript: boolean;
   outputDir: string;
+  extractTokens?: TokenExportFormat;
   llm?: {
     provider: 'bedrock' | 'openai' | 'anthropic';
     model: string;
@@ -118,6 +122,22 @@ export class FigmaToCodeAgent {
     };
 
     let files = generator.generate(transformedAst, generatorConfig);
+
+    // Step 6.5: Extract design tokens (optional)
+    if (this.config.extractTokens) {
+      const extractor = new DesignTokenExtractor();
+      const tokens = extractor.extract(transformedAst);
+      const exporter = new DesignTokenExporter();
+      const content = exporter.export(tokens, this.config.extractTokens);
+      const ext = this.config.extractTokens === 'json' ? 'json'
+        : this.config.extractTokens === 'js' ? 'js'
+        : this.config.extractTokens === 'scss' ? 'scss' : 'css';
+      files.push({
+        path: `${this.config.outputDir}/design-tokens.${ext}`,
+        content,
+      });
+      console.log(`✓ Extracted design tokens (${this.config.extractTokens} format)`);
+    }
 
     // Step 7: AI optimization (optional)
     if (this.aiOptimizer) {
