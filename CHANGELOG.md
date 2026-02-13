@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0] - 2026-02-13
+
+### Added
+- Property tests for Property 3 (component identification completeness) and Property 4 (image asset extraction)
+- Real Figma data end-to-end tests: 29 tests covering 4 real design files (MIUI12 Navigation, Homepage, Shopping Cart, Product Page)
+- Cross-design pipeline consistency tests (React vs Vue, css-modules vs css)
+- Full document processing test for large Figma canvas
+
+### Improved
+- Property test coverage now spans Properties 1-4, 5-44 (complete)
+- Total test count: 309 tests across 42 test suites
+
 ## [0.5.0] - 2026-02-13
 
 ### Added
