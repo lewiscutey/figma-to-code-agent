@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0] - 2026-02-13
+
+### Added
+- Optional transformers: StyleMerger (style deduplication with shared class references), ResponsiveMerger (breakpoint variant merging), AccessibilityEnhancer (ARIA roles, alt text, landmark detection), PerformanceOptimizer (lazy loading, code splitting hints, redundant wrapper removal)
+- Pure CSS mode: generates separate `.css` file for both React and Vue (previously inline styles only)
+- CSS rule deduplication: merges selectors with identical rule bodies
+- Responsive code generation: `@media` queries from ResponsiveMerger breakpoint metadata
+- Improved Tailwind CSS mapping: actual color values `bg-[rgba(...)]`, precise sizes `w-[200px]`, border-radius `rounded-[12px]`, spacing, typography
+- 24 new tests (222 total, all passing)
+
+### Changed
+- React/Vue generators now support all 3 style modes with external CSS files
+- Tailwind class generation uses arbitrary value syntax instead of hardcoded utility classes
+
 ## [0.4.0] - 2026-02-13
 
 ### Added
