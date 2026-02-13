@@ -85,7 +85,7 @@ npx figma-to-code-agent \
 
 ## Generated Output
 
-For a React component, you'll get:
+For a React component with CSS Modules, you'll get:
 
 ```
 output/
@@ -94,6 +94,15 @@ output/
 └── assets/                # Downloaded images
     ├── hero-image.png
     └── icon-close.png
+```
+
+For plain CSS mode (`--style css`):
+
+```
+output/
+├── Component.jsx          # React component
+├── Component.css          # Standalone CSS file
+└── assets/
 ```
 
 For Vue, a single `.vue` file with `<template>`, `<script setup>`, and `<style scoped>`.
@@ -119,6 +128,7 @@ For Vue, a single `.vue` file with `<template>`, `<script setup>`, and `<style s
 | `--style` | `css-modules`, `tailwind`, or `css` | `css-modules` |
 | `--typescript` | Enable TypeScript output | `false` |
 | `--output <dir>` | Output directory | `./output` |
+| `--extract-tokens <fmt>` | Extract design tokens: `css`, `scss`, `json`, `js` | — |
 | `--preview` | Preview in browser after generation | — |
 
 ## AI Enhancements (Optional)

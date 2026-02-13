@@ -34,11 +34,20 @@ Convert Figma designs to production-ready React/Vue components. Supports CSS Mod
 
 - 🎨 Extract designs from Figma API with caching and rate-limit handling
 - ⚛️ Generate React (.jsx/.tsx) and Vue (.vue) components
-- 🎭 CSS Modules, Tailwind, or plain CSS
+- 🎭 CSS Modules, Tailwind CSS (arbitrary values), or plain CSS with separate stylesheet
 - 📐 Absolute positioning with responsive scaling (auto-fits viewport)
 - 🖼️ Image export at 2x resolution, vector icon auto-detection and PNG export
 - 🔤 Full typography support (font family, size, weight, line-height, letter-spacing, color)
 - 👁️ Figma layer filtering (hidden layers, mask shapes)
+- 🎯 Design token extraction (CSS variables, SCSS, JSON, JS)
+- 🧩 Component splitting (auto-split large designs >50 nodes, max depth 4)
+- 📁 File organizer (PascalCase/kebab-case naming, directory structure, Props interface)
+- 🖼️ Asset management (image dedup, SVG-first, semantic naming, import generation)
+- 🔍 Visual validation (Puppeteer rendering, pixel comparison, similarity scoring)
+- ♿ Accessibility enhancement (ARIA roles, alt text, landmark detection)
+- ⚡ Performance optimization (lazy loading, code splitting hints, redundant wrapper removal)
+- 🎨 Style deduplication (merge identical CSS rules across components)
+- 📱 Responsive code generation (media queries from breakpoint metadata)
 - 🤖 Optional AI enhancements (semantic naming, component splitting, code optimization)
 
 ## Install
@@ -79,10 +88,12 @@ npx figma-to-code-agent \
 1. Fetches the Figma file data via API (with local caching)
 2. Parses the design tree into an intermediate AST
 3. Filters invisible layers, mask shapes, and transparent fills
-4. Detects vector-only containers and exports them as PNG icons
-5. Downloads images at 2x resolution
-6. Generates framework-specific components with CSS Modules
-7. Wraps output in a responsive scale container (no horizontal scrollbar)
+4. Applies transformation pipeline (flatten, extract components, optimize layout, semantic naming, style merging, accessibility, performance)
+5. Detects vector-only containers and exports them as PNG icons
+6. Downloads images at 2x resolution
+7. Generates framework-specific components with chosen style mode
+8. Deduplicates identical CSS rules and generates responsive media queries
+9. Wraps output in a responsive scale container (no horizontal scrollbar)
 
 ## CLI Options
 
@@ -95,6 +106,7 @@ npx figma-to-code-agent \
 | `--style` | `css-modules`, `tailwind`, or `css` | `css-modules` |
 | `--typescript` | Enable TypeScript output | `false` |
 | `--output <dir>` | Output directory | `./output` |
+| `--extract-tokens <fmt>` | Extract design tokens: `css`, `scss`, `json`, `js` | — |
 | `--preview` | Preview in browser after generation | — |
 
 ### AI Options (optional)
@@ -103,9 +115,12 @@ npx figma-to-code-agent \
 |--------|-------------|
 | `--llm-provider` | `bedrock`, `openai`, or `anthropic` |
 | `--llm-model` | Model name |
+| `--llm-region` | AWS region for Bedrock (default: `us-east-1`) |
+| `--llm-api-key` | API key for OpenAI/Anthropic (or `LLM_API_KEY` env) |
 | `--ai-naming` | AI-powered semantic component naming |
 | `--ai-splitting` | AI-powered component splitting |
 | `--ai-optimization` | AI-powered code optimization |
+| `--ai-layout` | AI-powered layout analysis |
 
 ## Programmatic API
 
@@ -119,6 +134,7 @@ const agent = new FigmaToCodeAgent({
   styleMode: 'css-modules',
   typescript: false,
   outputDir: './output',
+  extractTokens: 'css', // optional: 'css' | 'scss' | 'json' | 'js'
 })
 
 const files = await agent.convert()
@@ -130,10 +146,16 @@ const files = await agent.convert()
 src/
 ├── extraction/          # Figma API client, MCP protocol, caching
 ├── transformation/      # AST parsing, layout optimization, transformers
-│   └── transformers/    # Component extraction, semantic naming, etc.
-├── generation/          # React and Vue code generators
+│   └── transformers/    # Flatten, component extraction, semantic naming,
+│                        # style merger, responsive merger, accessibility,
+│                        # performance optimizer, AI-powered transformers
+├── generation/          # React and Vue code generators, file organizer
+├── tokens/              # Design token extraction and export
+├── assets/              # Asset management (image extraction, dedup)
+├── validation/          # Visual validation (Puppeteer, pixel comparison)
+├── config/              # Configuration management
+├── errors/              # Error handling and recovery
 ├── llm/                 # LLM providers (Bedrock, OpenAI)
-├── validation/          # Visual validation
 └── cli.ts               # CLI entry point
 ```
 
@@ -144,7 +166,7 @@ git clone https://github.com/lewiscutey/figma-to-code-agent.git
 cd figma-to-code-agent
 npm install
 npm run build        # Compile TypeScript
-npm test             # Run all tests (129 tests)
+npm test             # Run all tests (222 tests)
 npm run lint         # ESLint
 npm run format       # Prettier
 ```
