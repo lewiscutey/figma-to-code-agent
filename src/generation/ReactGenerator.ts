@@ -49,11 +49,16 @@ export class ReactGenerator implements CodeGenerator {
       content: componentCode,
     });
 
-    // Generate CSS file for css-modules mode
+    // Generate CSS file for css-modules and css modes
     if (config.styleMode === 'css-modules') {
       files.push({
         path: `${config.outputDir}/${this.toFileName(node.name)}.module.css`,
-        content: this.generateCSSModule(node),
+        content: this.generateCSS(node),
+      });
+    } else if (config.styleMode === 'css') {
+      files.push({
+        path: `${config.outputDir}/${this.toFileName(node.name)}.css`,
+        content: this.generateCSS(node),
       });
     }
 
@@ -73,6 +78,8 @@ export class ReactGenerator implements CodeGenerator {
 
     if (config.styleMode === 'css-modules') {
       imports.push(`import styles from './${this.toFileName(node.name)}.module.css'`);
+    } else if (config.styleMode === 'css') {
+      imports.push(`import './${this.toFileName(node.name)}.css'`);
     }
 
     // Add image imports (deduplicate by variable name)
@@ -114,6 +121,17 @@ export class ReactGenerator implements CodeGenerator {
     const jsx = this.generateJSX(node, config, 0);
     const designWidth = Math.round(node.layout.size.width) || 1920;
 
+    const wrapperClass = config.styleMode === 'css-modules'
+      ? `className={styles['responsive-wrapper']}`
+      : config.styleMode === 'tailwind'
+        ? `className="w-full overflow-hidden"`
+        : `className="responsive-wrapper"`;
+    const containerClass = config.styleMode === 'css-modules'
+      ? `className={styles['scale-container']}`
+      : config.styleMode === 'tailwind'
+        ? `className="w-[${designWidth}px] origin-top-left"`
+        : `className="scale-container"`;
+
     return `export function ${componentName}(${propsParam}) {
     const containerRef = React.useRef(null)
     const [scale, setScale] = React.useState(1)
@@ -131,8 +149,8 @@ export class ReactGenerator implements CodeGenerator {
     }, [])
 
     return (
-      <div className={styles['responsive-wrapper']}>
-        <div ref={containerRef} className={styles['scale-container']} style={{ transform: \`scale(\${scale})\` }}>
+      <div ${wrapperClass}>
+        <div ref={containerRef} ${containerClass} style={{ transform: \`scale(\${scale})\` }}>
   ${this.indent(jsx, 4)}
         </div>
       </div>
@@ -144,9 +162,8 @@ export class ReactGenerator implements CodeGenerator {
   private generateJSX(node: ASTNode, config: GeneratorConfig, depth: number = 0): string {
     const tag = this.getHTMLTag(node);
     const className = this.generateClassName(node, config);
-    const style = config.styleMode === 'css' ? this.generateInlineStyle(node) : '';
 
-    const attrs = [className, style].filter(Boolean).join(' ');
+    const attrs = [className].filter(Boolean).join(' ');
 
     // Add Figma layer name as comment for better readability (but not for root element)
     const layerName = node.name || 'unnamed';
@@ -199,6 +216,7 @@ export class ReactGenerator implements CodeGenerator {
     if (config.styleMode === 'tailwind') {
       return `className="${this.generateTailwindClasses(node)}"`;
     }
+    // Plain CSS mode — use class names referencing the external .css file
     return `className="${uniqueName}"`;
   }
 
@@ -236,43 +254,78 @@ export class ReactGenerator implements CodeGenerator {
   private generateTailwindClasses(node: ASTNode): string {
     const classes: string[] = [];
 
+    // Layout
     if (node.layout.display === 'flex') {
       classes.push('flex');
       if (node.layout.flexDirection === 'column') classes.push('flex-col');
       if (node.layout.justifyContent) classes.push(`justify-${node.layout.justifyContent}`);
       if (node.layout.alignItems) classes.push(`items-${node.layout.alignItems}`);
-      if (node.layout.gap) classes.push(`gap-${Math.round(node.layout.gap / 4)}`);
+      if (node.layout.gap) classes.push(`gap-${this.toTailwindSpacing(node.layout.gap)}`);
     }
 
+    // Size
+    if (node.layout.size.width) classes.push(`w-[${Math.round(node.layout.size.width)}px]`);
+    if (node.layout.size.height) classes.push(`h-[${Math.round(node.layout.size.height)}px]`);
+
+    // Background color
     if (node.styles.backgroundColor) {
-      classes.push('bg-gray-100');
+      const c = node.styles.backgroundColor;
+      classes.push(`bg-[rgba(${c.r},${c.g},${c.b},${c.a})]`);
     }
 
+    // Border radius
     if (node.styles.borderRadius) {
       const radius = Array.isArray(node.styles.borderRadius)
         ? node.styles.borderRadius[0]
         : node.styles.borderRadius;
-      classes.push(`rounded-${radius > 8 ? 'lg' : 'md'}`);
+      if (radius > 0) {
+        classes.push(radius >= 9999 ? 'rounded-full' : `rounded-[${radius}px]`);
+      }
+    }
+
+    // Opacity
+    if (node.styles.opacity !== undefined && node.styles.opacity !== 1) {
+      classes.push(`opacity-${Math.round(node.styles.opacity * 100)}`);
+    }
+
+    // Typography
+    if (node.type === 'Text' && node.styles.typography) {
+      const t = node.styles.typography;
+      classes.push(`text-[${t.fontSize}px]`);
+      classes.push(`font-[${t.fontWeight}]`);
+      if (t.textAlign && t.textAlign !== 'left') classes.push(`text-${t.textAlign}`);
+    }
+
+    // Padding
+    if (node.layout.padding) {
+      const p = node.layout.padding;
+      if (typeof p === 'object' && 'top' in p) {
+        const { top, right, bottom, left } = p;
+        if (top === right && right === bottom && bottom === left && top > 0) {
+          classes.push(`p-${this.toTailwindSpacing(top)}`);
+        } else {
+          if (top > 0) classes.push(`pt-${this.toTailwindSpacing(top)}`);
+          if (right > 0) classes.push(`pr-${this.toTailwindSpacing(right)}`);
+          if (bottom > 0) classes.push(`pb-${this.toTailwindSpacing(bottom)}`);
+          if (left > 0) classes.push(`pl-${this.toTailwindSpacing(left)}`);
+        }
+      }
+    }
+
+    // Responsive breakpoint classes from ResponsiveMerger metadata
+    const meta = node.metadata as any;
+    if (meta.responsive && meta.breakpoints) {
+      classes.push('responsive');
     }
 
     return classes.join(' ');
   }
 
-  private generateInlineStyle(node: ASTNode): string {
-    const styles: string[] = [];
-
-    if (node.styles.backgroundColor) {
-      const { r, g, b, a } = node.styles.backgroundColor;
-      styles.push(`backgroundColor: 'rgba(${r},${g},${b},${a})'`);
-    }
-
-    if (node.styles.borderRadius) {
-      styles.push(`borderRadius: ${node.styles.borderRadius}`);
-    }
-
-    if (styles.length === 0) return '';
-
-    return `style={{ ${styles.join(', ')} }}`;
+  private toTailwindSpacing(px: number): string {
+    const rounded = Math.round(px);
+    // Use Tailwind's spacing scale where possible
+    if (rounded % 4 === 0) return String(rounded / 4);
+    return `[${rounded}px]`;
   }
 
   private toComponentName(name: string): string {
@@ -313,7 +366,7 @@ export class ReactGenerator implements CodeGenerator {
       .join('\n');
   }
 
-  private generateCSSModule(node: ASTNode): string {
+  private generateCSS(node: ASTNode): string {
     const styles: string[] = [];
     const designWidth = Math.round(node.layout.size.width) || 1920;
     const designHeight = Math.round(node.layout.size.height) || 1080;
@@ -326,7 +379,75 @@ export class ReactGenerator implements CodeGenerator {
 
     this.usedClassNames = new Map();
     this.collectStyles(node, styles);
-    return styles.join('\n\n') + '\n';
+
+    // Deduplicate identical CSS rules
+    const deduped = this.deduplicateStyles(styles);
+
+    // Add responsive media queries from ResponsiveMerger metadata
+    const mediaQueries = this.generateMediaQueries(node);
+    if (mediaQueries) {
+      deduped.push(mediaQueries);
+    }
+
+    return deduped.join('\n\n') + '\n';
+  }
+
+  /**
+   * Deduplicate CSS rules: merge selectors that have identical rule bodies.
+   */
+  private deduplicateStyles(styles: string[]): string[] {
+    const ruleMap = new Map<string, string[]>(); // body -> selectors
+    const ordered: string[] = []; // track insertion order of bodies
+
+    for (const block of styles) {
+      const braceIdx = block.indexOf('{');
+      if (braceIdx === -1) {
+        ordered.push(block);
+        continue;
+      }
+      const selector = block.substring(0, braceIdx).trim();
+      const body = block.substring(braceIdx).trim();
+
+      if (!ruleMap.has(body)) {
+        ruleMap.set(body, []);
+        ordered.push(body);
+      }
+      ruleMap.get(body)!.push(selector);
+    }
+
+    return ordered.map((body) => {
+      const selectors = ruleMap.get(body);
+      if (!selectors) return body; // non-rule block
+      return `${selectors.join(',\n')} ${body}`;
+    });
+  }
+
+  /**
+   * Generate @media queries for responsive components (from ResponsiveMerger metadata).
+   */
+  private generateMediaQueries(node: ASTNode): string | null {
+    const queries: string[] = [];
+    this.collectMediaQueries(node, queries);
+    return queries.length > 0 ? queries.join('\n\n') : null;
+  }
+
+  private collectMediaQueries(node: ASTNode, queries: string[]): void {
+    const meta = node.metadata as any;
+    if (meta.responsive && Array.isArray(meta.breakpoints)) {
+      const className = this.nodeClassMap.get(node.id) || this.sanitizeCSSName(node.name);
+      for (const bp of meta.breakpoints) {
+        const minW = bp.width || bp.breakpoint?.minWidth;
+        if (minW && bp.layout) {
+          const rules: string[] = [];
+          if (bp.layout.size?.width) rules.push(`  width: ${Math.round(bp.layout.size.width)}px;`);
+          if (bp.layout.size?.height) rules.push(`  height: ${Math.round(bp.layout.size.height)}px;`);
+          if (rules.length > 0) {
+            queries.push(`@media (min-width: ${minW}px) {\n  .${className} {\n  ${rules.join('\n  ')}\n  }\n}`);
+          }
+        }
+      }
+    }
+    node.children.forEach((child) => this.collectMediaQueries(child, queries));
   }
 
   private collectStyles(node: ASTNode, styles: string[], parentNode?: ASTNode): void {

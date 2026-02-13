@@ -58,6 +58,14 @@ export class VueGenerator implements CodeGenerator {
       content: componentCode,
     });
 
+    // For css mode, also generate a standalone CSS file
+    if (config.styleMode === 'css') {
+      files.push({
+        path: `${config.outputDir}/${this.toFileName(node.name)}.css`,
+        content: this.generateStandaloneCSS(node),
+      });
+    }
+
     return files;
   }
 
@@ -87,7 +95,9 @@ ${this.indent(inner, 2)}
 
   private generateElement(node: ASTNode, config: GeneratorConfig, depth: number): string {
     const tag = this.getHTMLTag(node);
-    const className = this.nodeClassMap.get(node.id) || this.sanitizeCSSName(node.name);
+    const className = config.styleMode === 'tailwind'
+      ? this.generateTailwindClasses(node)
+      : this.nodeClassMap.get(node.id) || this.sanitizeCSSName(node.name);
     const layerName = node.name || 'unnamed';
     const comment = depth > 0 ? `<!-- ${layerName} -->\n` : '';
 
@@ -184,9 +194,100 @@ onUnmounted(() => {
 
     this.collectStyles(node, styles);
 
+    // Deduplicate identical CSS rules
+    const deduped = this.deduplicateStyles(styles);
+
+    // Add responsive media queries
+    const mediaQueries = this.generateMediaQueries(node);
+    if (mediaQueries) {
+      deduped.push(mediaQueries);
+    }
+
     return `<style scoped>
-${styles.join('\n\n')}
+${deduped.join('\n\n')}
 </style>`;
+  }
+
+  /**
+   * Generate a standalone CSS file (for css mode).
+   */
+  private generateStandaloneCSS(node: ASTNode): string {
+    const styles: string[] = [];
+    const designWidth = Math.round(node.layout.size.width) || 1920;
+    const designHeight = Math.round(node.layout.size.height) || 1080;
+
+    styles.push(`.responsive-wrapper {\n  width: 100%;\n  overflow: hidden;\n}`);
+    styles.push(
+      `.scale-container {\n  width: ${designWidth}px;\n  height: ${designHeight}px;\n  transform-origin: top left;\n}`
+    );
+
+    this.collectStyles(node, styles);
+    const deduped = this.deduplicateStyles(styles);
+
+    const mediaQueries = this.generateMediaQueries(node);
+    if (mediaQueries) {
+      deduped.push(mediaQueries);
+    }
+
+    return deduped.join('\n\n') + '\n';
+  }
+
+  /**
+   * Deduplicate CSS rules: merge selectors with identical rule bodies.
+   */
+  private deduplicateStyles(styles: string[]): string[] {
+    const ruleMap = new Map<string, string[]>();
+    const ordered: string[] = [];
+
+    for (const block of styles) {
+      const braceIdx = block.indexOf('{');
+      if (braceIdx === -1) {
+        ordered.push(block);
+        continue;
+      }
+      const selector = block.substring(0, braceIdx).trim();
+      const body = block.substring(braceIdx).trim();
+
+      if (!ruleMap.has(body)) {
+        ruleMap.set(body, []);
+        ordered.push(body);
+      }
+      ruleMap.get(body)!.push(selector);
+    }
+
+    return ordered.map((body) => {
+      const selectors = ruleMap.get(body);
+      if (!selectors) return body;
+      return `${selectors.join(',\n')} ${body}`;
+    });
+  }
+
+  /**
+   * Generate @media queries for responsive components.
+   */
+  private generateMediaQueries(node: ASTNode): string | null {
+    const queries: string[] = [];
+    this.collectMediaQueries(node, queries);
+    return queries.length > 0 ? queries.join('\n\n') : null;
+  }
+
+  private collectMediaQueries(node: ASTNode, queries: string[]): void {
+    const meta = node.metadata as any;
+    if (meta.responsive && Array.isArray(meta.breakpoints)) {
+      const className = this.nodeClassMap.get(node.id) || this.sanitizeCSSName(node.name);
+      for (const bp of meta.breakpoints) {
+        const minW = bp.width || bp.breakpoint?.minWidth;
+        if (minW && bp.layout) {
+          const rules: string[] = [];
+          if (bp.layout.size?.width) rules.push(`  width: ${Math.round(bp.layout.size.width)}px;`);
+          if (bp.layout.size?.height) rules.push(`  height: ${Math.round(bp.layout.size.height)}px;`);
+          if (rules.length > 0) {
+            queries.push(`@media (min-width: ${minW}px) {\n  .${className} {\n  ${rules.join('\n  ')}\n  }\n}`);
+          }
+        }
+      }
+    }
+    node.children.forEach((child) => this.collectMediaQueries(child, queries));
   }
 
   private collectStyles(node: ASTNode, styles: string[], parentNode?: ASTNode): void {
@@ -349,11 +450,62 @@ ${styles.join('\n\n')}
 
   private generateTailwindClasses(node: ASTNode): string {
     const classes: string[] = [];
+
+    // Layout
     if (node.layout.display === 'flex') {
       classes.push('flex');
       if (node.layout.flexDirection === 'column') classes.push('flex-col');
+      if (node.layout.justifyContent) classes.push(`justify-${node.layout.justifyContent}`);
+      if (node.layout.alignItems) classes.push(`items-${node.layout.alignItems}`);
+      if (node.layout.gap) classes.push(`gap-${this.toTailwindSpacing(node.layout.gap)}`);
     }
+
+    // Size
+    if (node.layout.size.width) classes.push(`w-[${Math.round(node.layout.size.width)}px]`);
+    if (node.layout.size.height) classes.push(`h-[${Math.round(node.layout.size.height)}px]`);
+
+    // Background color
+    if (node.styles.backgroundColor) {
+      const c = node.styles.backgroundColor;
+      classes.push(`bg-[rgba(${c.r},${c.g},${c.b},${c.a})]`);
+    }
+
+    // Border radius
+    if (node.styles.borderRadius) {
+      const radius = Array.isArray(node.styles.borderRadius)
+        ? node.styles.borderRadius[0]
+        : node.styles.borderRadius;
+      if (radius > 0) {
+        classes.push(radius >= 9999 ? 'rounded-full' : `rounded-[${radius}px]`);
+      }
+    }
+
+    // Opacity
+    if (node.styles.opacity !== undefined && node.styles.opacity !== 1) {
+      classes.push(`opacity-${Math.round(node.styles.opacity * 100)}`);
+    }
+
+    // Typography
+    if (node.type === 'Text' && node.styles.typography) {
+      const t = node.styles.typography;
+      classes.push(`text-[${t.fontSize}px]`);
+      classes.push(`font-[${t.fontWeight}]`);
+      if (t.textAlign && t.textAlign !== 'left') classes.push(`text-${t.textAlign}`);
+    }
+
+    // Responsive breakpoint classes
+    const meta = node.metadata as any;
+    if (meta.responsive && meta.breakpoints) {
+      classes.push('responsive');
+    }
+
     return classes.join(' ');
+  }
+
+  private toTailwindSpacing(px: number): string {
+    const rounded = Math.round(px);
+    if (rounded % 4 === 0) return String(rounded / 4);
+    return `[${rounded}px]`;
   }
 
   private toFileName(name: string): string {

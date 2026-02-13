@@ -21,11 +21,12 @@ describe('VueGenerator', () => {
 
     const files = generator.generate(node, config);
 
-    expect(files).toHaveLength(1);
+    expect(files).toHaveLength(2);
     expect(files[0].path).toBe('src/components/Button.vue');
     expect(files[0].content).toContain('<template>');
     expect(files[0].content).toContain('<script setup');
     expect(files[0].content).toContain('<style');
+    expect(files[1].path).toBe('src/components/Button.css');
   });
 
   it('should generate TypeScript script', () => {
@@ -73,5 +74,31 @@ describe('VueGenerator', () => {
 
     expect(files[0].content).toContain('<div');
     expect(files[0].content).toContain('<span');
+  });
+
+  it('should generate standalone CSS file for css mode', () => {
+    const node = createContainerNode('1', 'card', '1:1', 'FRAME');
+
+    const files = generator.generate(node, config);
+
+    expect(files).toHaveLength(2);
+    expect(files[1].path).toBe('src/components/Card.css');
+    expect(files[1].content).toContain('.responsive-wrapper');
+  });
+
+  it('should generate improved Tailwind classes', () => {
+    config.styleMode = 'tailwind';
+    const node = createContainerNode('1', 'box', '1:1', 'FRAME');
+    node.layout.display = 'flex';
+    node.layout.flexDirection = 'column';
+    node.layout.size = { width: 300, height: 200 };
+    node.styles.backgroundColor = { r: 50, g: 100, b: 200, a: 1 };
+
+    const files = generator.generate(node, config);
+
+    expect(files[0].content).toContain('flex');
+    expect(files[0].content).toContain('flex-col');
+    expect(files[0].content).toContain('w-[300px]');
+    expect(files[0].content).toContain('bg-[rgba(50,100,200,1)]');
   });
 });

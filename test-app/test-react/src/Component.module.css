@@ -77,16 +77,7 @@
   background-color: rgba(0, 0, 0, 0.4000000059604645);
 }
 
-.group2523 {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  width: 384px;
-  height: 1080px;
-  overflow: hidden;
-  background-color: inherit;
-}
-
+.group2523,
 .mask-group {
   position: absolute;
   left: 0px;
@@ -126,7 +117,11 @@
   background-color: rgba(0, 0, 0, 0.30000001192092896);
 }
 
-.text-1 {
+.text-1,
+.text-2,
+.text-3,
+.text-4,
+.text-5 {
   position: absolute;
   left: 70px;
   top: 250px;
@@ -165,7 +160,8 @@
   color: rgba(255, 255, 255, 1);
 }
 
-.rectangle38 {
+.rectangle38,
+.rectangle38-2 {
   position: absolute;
   left: 2px;
   top: 44px;
@@ -184,21 +180,9 @@
   background-color: inherit;
 }
 
-.text-2 {
-  position: absolute;
-  left: 70px;
-  top: 250px;
-  width: 104px;
-  height: 440px;
-  font-family: 'MI Lan Pro', sans-serif;
-  font-size: 100px;
-  font-weight: 300;
-  line-height: 110px;
-  text-align: left;
-  color: rgba(255, 255, 255, 1);
-}
-
-.group2512-1 {
+.group2512-1,
+.group2512-2,
+.group2512-4 {
   position: absolute;
   left: 70px;
   top: 946px;
@@ -208,7 +192,8 @@
   background-color: inherit;
 }
 
-.element-2 {
+.element-2,
+.element-5 {
   position: absolute;
   left: 0px;
   top: 0px;
@@ -224,7 +209,9 @@
   color: rgba(255, 255, 255, 1);
 }
 
-.rectangle38-1 {
+.rectangle38-1,
+.rectangle38-3,
+.rectangle38-4 {
   position: absolute;
   left: 2px;
   top: 44px;
@@ -254,30 +241,6 @@
   display: block;
 }
 
-.text-3 {
-  position: absolute;
-  left: 70px;
-  top: 250px;
-  width: 104px;
-  height: 440px;
-  font-family: 'MI Lan Pro', sans-serif;
-  font-size: 100px;
-  font-weight: 300;
-  line-height: 110px;
-  text-align: left;
-  color: rgba(255, 255, 255, 1);
-}
-
-.group2512-2 {
-  position: absolute;
-  left: 70px;
-  top: 946px;
-  width: 30px;
-  height: 46px;
-  overflow: hidden;
-  background-color: inherit;
-}
-
 .element-3 {
   position: absolute;
   left: 0px;
@@ -293,15 +256,6 @@
   color: rgba(255, 255, 255, 1);
 }
 
-.rectangle38-2 {
-  position: absolute;
-  left: 2px;
-  top: 44px;
-  width: 14px;
-  height: 2px;
-  background-color: rgba(255, 255, 255, 1);
-}
-
 .group2529 {
   position: absolute;
   left: 1152px;
@@ -310,20 +264,6 @@
   height: 1080px;
   overflow: hidden;
   background-color: inherit;
-}
-
-.text-4 {
-  position: absolute;
-  left: 70px;
-  top: 250px;
-  width: 104px;
-  height: 440px;
-  font-family: 'MI Lan Pro', sans-serif;
-  font-size: 100px;
-  font-weight: 300;
-  line-height: 110px;
-  text-align: left;
-  color: rgba(255, 255, 255, 1);
 }
 
 .group2512-3 {
@@ -352,16 +292,6 @@
   color: rgba(255, 255, 255, 1);
 }
 
-.rectangle38-3 {
-  position: absolute;
-  left: 2px;
-  top: 44px;
-  width: 14px;
-  height: 2px;
-  background-color: rgba(255, 255, 255, 1);
-  opacity: 0.4000000059604645;
-}
-
 .group2530 {
   position: absolute;
   left: 1536px;
@@ -370,56 +300,6 @@
   height: 1080px;
   overflow: hidden;
   background-color: inherit;
-}
-
-.text-5 {
-  position: absolute;
-  left: 70px;
-  top: 250px;
-  width: 104px;
-  height: 440px;
-  font-family: 'MI Lan Pro', sans-serif;
-  font-size: 100px;
-  font-weight: 300;
-  line-height: 110px;
-  text-align: left;
-  color: rgba(255, 255, 255, 1);
-}
-
-.group2512-4 {
-  position: absolute;
-  left: 70px;
-  top: 946px;
-  width: 30px;
-  height: 46px;
-  overflow: hidden;
-  background-color: inherit;
-}
-
-.element-5 {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  width: 30px;
-  height: 34px;
-  opacity: 0.5;
-  font-family: 'Mitype', sans-serif;
-  font-size: 28px;
-  font-weight: 500;
-  line-height: 34px;
-  text-align: left;
-  white-space: nowrap;
-  color: rgba(255, 255, 255, 1);
-}
-
-.rectangle38-4 {
-  position: absolute;
-  left: 2px;
-  top: 44px;
-  width: 14px;
-  height: 2px;
-  background-color: rgba(255, 255, 255, 1);
-  opacity: 0.4000000059604645;
 }
 
 .group2608 {
