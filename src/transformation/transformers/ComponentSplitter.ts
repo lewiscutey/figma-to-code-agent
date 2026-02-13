@@ -66,7 +66,7 @@ export class ComponentSplitter implements Transformer {
     children: ASTNode[],
     parentName: string,
     index: number,
-    depth: number,
+    _depth: number,
   ): ASTNode {
     const name = `${parentName}-section-${index + 1}`;
     // Compute bounding box from children
