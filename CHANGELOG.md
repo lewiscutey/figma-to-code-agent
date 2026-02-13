@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0] - 2026-02-13
+
+### Added
+- Design token extraction and export (CSS variables, SCSS, JSON, JS)
+- `--extract-tokens <format>` CLI option
+- Component splitter: auto-split large designs (>50 nodes) into sub-components with max depth control
+- File organizer: framework-convention file naming (PascalCase for React, kebab-case for Vue), directory structure generation, Props interface inference
+- Asset manager: image extraction, deduplication by imageRef, SVG-first detection, semantic file naming, import statement generation
+- Visual validator: headless browser rendering via Puppeteer, pixel-level image comparison, similarity scoring, diff report with fix suggestions
+- Configuration manager: JSON config parsing, validation, deep merge with defaults
+- Error handling system: ErrorType enum, SystemError class, Logger with level filtering, recovery strategies (retry/skip/fallback), processing report generation
+- 55 new tests (198 total, all passing)
+
 ## [0.3.4] - 2026-02-12
 
 ### Fixed
