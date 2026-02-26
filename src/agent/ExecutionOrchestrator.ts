@@ -9,7 +9,7 @@ import type {
   Artifact,
   Checkpoint,
 } from './types';
-import type { Tool } from './DecisionEngine';
+import type { Tool } from '../tools/types';
 
 /**
  * 执行编排器

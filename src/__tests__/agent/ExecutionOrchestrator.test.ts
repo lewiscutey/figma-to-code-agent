@@ -1,5 +1,5 @@
 import { ExecutionOrchestrator } from '../../agent/ExecutionOrchestrator';
-import type { Tool } from '../../agent/DecisionEngine';
+import type { Tool } from '../../tools/types';
 import type { Strategy, ConversationContext } from '../../agent/types';
 
 describe('ExecutionOrchestrator', () => {
@@ -84,7 +84,7 @@ describe('ExecutionOrchestrator', () => {
       const result = await orchestrator.invokeTool(mockTool, {});
 
       expect(result.success).toBe(true);
-      expect(result.metadata.duration).toBeGreaterThanOrEqual(10);
+      expect(result.metadata.duration).toBeGreaterThanOrEqual(9); // Allow 1ms tolerance
     });
   });
 

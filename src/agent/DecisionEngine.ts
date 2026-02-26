@@ -1,16 +1,5 @@
 import type { Intent, Strategy, StrategyScore, StrategyStep, ConversationContext } from './types';
-
-/**
- * 工具接口定义
- */
-export interface Tool {
-  name: string;
-  description: string;
-  category: 'extraction' | 'transformation' | 'generation' | 'analysis' | 'validation';
-  capabilities: string[];
-  isAvailable(): Promise<boolean>;
-  execute(inputs: Record<string, any>): Promise<any>;
-}
+import type { Tool } from '../tools/types';
 
 /**
  * 决策引擎

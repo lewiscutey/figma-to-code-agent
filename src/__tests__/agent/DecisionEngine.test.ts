@@ -1,4 +1,5 @@
-import { DecisionEngine, Tool } from '../../agent/DecisionEngine';
+import { DecisionEngine } from '../../agent/DecisionEngine';
+import type { Tool } from '../../tools/types';
 import type { Intent, ConversationContext, Strategy } from '../../agent/types';
 
 describe('DecisionEngine', () => {
