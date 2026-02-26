@@ -17,6 +17,17 @@ export interface ProjectAnalysisResult {
     semi: boolean;
   };
   pathAliases?: Record<string, string>;
+  components?: ComponentInfo[];
+  srcDirectory?: string;
+}
+
+export interface ComponentInfo {
+  name: string;
+  path: string;
+  type: 'component' | 'page' | 'layout';
+  framework: 'react' | 'vue';
+  hasStyles: boolean;
+  hasTests: boolean;
 }
 
 /**
@@ -103,6 +114,12 @@ export class ProjectAnalysisTool implements Tool {
 
     // 分析路径别名
     result.pathAliases = this.analyzePathAliases();
+
+    // 发现组件库
+    if (result.framework && result.framework !== 'unknown') {
+      result.components = this.discoverComponents(result.framework);
+      result.srcDirectory = this.findSrcDirectory();
+    }
 
     return result;
   }
@@ -280,5 +297,183 @@ export class ProjectAnalysisTool implements Tool {
       return rule[1] !== 'never';
     }
     return true;
+  }
+
+  /**
+   * 查找 src 目录
+   */
+  private findSrcDirectory(): string | undefined {
+    const possibleDirs = ['src', 'app', 'lib', 'components'];
+
+    for (const dir of possibleDirs) {
+      const dirPath = path.join(this.projectRoot, dir);
+      if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
+        return dir;
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * 发现项目中的组件
+   */
+  private discoverComponents(framework: 'react' | 'vue'): ComponentInfo[] {
+    const components: ComponentInfo[] = [];
+    const srcDir = this.findSrcDirectory();
+
+    if (!srcDir) {
+      return components;
+    }
+
+    const srcPath = path.join(this.projectRoot, srcDir);
+    const extensions = framework === 'react' ? ['.tsx', '.jsx'] : ['.vue'];
+
+    // 递归扫描组件
+    this.scanDirectory(srcPath, srcPath, extensions, framework, components);
+
+    return components;
+  }
+
+  /**
+   * 递归扫描目录查找组件
+   */
+  private scanDirectory(
+    dirPath: string,
+    basePath: string,
+    extensions: string[],
+    framework: 'react' | 'vue',
+    components: ComponentInfo[],
+    depth = 0
+  ): void {
+    // 限制递归深度
+    if (depth > 10) {
+      return;
+    }
+
+    // 跳过 node_modules 和其他不需要的目录
+    const skipDirs = ['node_modules', 'dist', 'build', '.git', 'coverage', '__tests__'];
+    const dirName = path.basename(dirPath);
+    if (skipDirs.includes(dirName)) {
+      return;
+    }
+
+    try {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+
+        if (entry.isDirectory()) {
+          this.scanDirectory(fullPath, basePath, extensions, framework, components, depth + 1);
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name);
+          if (extensions.includes(ext)) {
+            const componentInfo = this.analyzeComponent(fullPath, basePath, framework);
+            if (componentInfo) {
+              components.push(componentInfo);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      // 忽略无法读取的目录
+    }
+  }
+
+  /**
+   * 分析单个组件文件
+   */
+  private analyzeComponent(
+    filePath: string,
+    basePath: string,
+    framework: 'react' | 'vue'
+  ): ComponentInfo | null {
+    try {
+      const relativePath = path.relative(basePath, filePath);
+      const fileName = path.basename(filePath, path.extname(filePath));
+
+      // 判断组件类型
+      let type: ComponentInfo['type'] = 'component';
+      if (relativePath.includes('pages') || relativePath.includes('views')) {
+        type = 'page';
+      } else if (relativePath.includes('layouts') || relativePath.includes('layout')) {
+        type = 'layout';
+      }
+
+      // 检查是否有样式文件
+      const hasStyles = this.hasStyleFile(filePath);
+
+      // 检查是否有测试文件
+      const hasTests = this.hasTestFile(filePath);
+
+      return {
+        name: fileName,
+        path: relativePath,
+        type,
+        framework,
+        hasStyles,
+        hasTests,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * 检查是否有对应的样式文件
+   */
+  private hasStyleFile(componentPath: string): boolean {
+    const dir = path.dirname(componentPath);
+    const baseName = path.basename(componentPath, path.extname(componentPath));
+
+    const styleExtensions = ['.css', '.scss', '.sass', '.less', '.module.css', '.module.scss'];
+
+    for (const ext of styleExtensions) {
+      const stylePath = path.join(dir, baseName + ext);
+      if (fs.existsSync(stylePath)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * 检查是否有对应的测试文件
+   */
+  private hasTestFile(componentPath: string): boolean {
+    const dir = path.dirname(componentPath);
+    const baseName = path.basename(componentPath, path.extname(componentPath));
+    const ext = path.extname(componentPath);
+
+    const testPatterns = [
+      `${baseName}.test${ext}`,
+      `${baseName}.spec${ext}`,
+      `${baseName}.test.ts`,
+      `${baseName}.spec.ts`,
+      `${baseName}.test.tsx`,
+      `${baseName}.spec.tsx`,
+    ];
+
+    for (const pattern of testPatterns) {
+      const testPath = path.join(dir, pattern);
+      if (fs.existsSync(testPath)) {
+        return true;
+      }
+    }
+
+    // 检查 __tests__ 目录
+    const testsDir = path.join(dir, '__tests__');
+    if (fs.existsSync(testsDir)) {
+      for (const pattern of testPatterns) {
+        const testPath = path.join(testsDir, pattern);
+        if (fs.existsSync(testPath)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }
