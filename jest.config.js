@@ -13,5 +13,8 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   verbose: true,
-  testTimeout: 30000
+  testTimeout: 30000,
+  transformIgnorePatterns: [
+    'node_modules/(?!uuid)'
+  ]
 };
