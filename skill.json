@@ -1,0 +1,277 @@
+{
+  "name": "figma-to-code-agent",
+  "displayName": "Figma to Code Agent",
+  "version": "1.0.0",
+  "description": "AI Agent that converts Figma designs to production-ready code with intelligent decision-making and iterative optimization",
+  "author": "lewiscutey",
+  "icon": "🎨",
+  "category": "development",
+  "tags": ["figma", "code-generation", "react", "vue", "design-to-code", "ai", "agent"],
+  "homepage": "https://github.com/lewiscutey/figma-to-code-agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lewiscutey/figma-to-code-agent.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "kiro": ">=1.0.0",
+    "node": ">=18.0.0"
+  },
+  "main": "dist/skill/index.js",
+  "commands": [
+    {
+      "name": "generate_from_figma",
+      "displayName": "Generate Code from Figma",
+      "description": "Convert Figma design to production-ready code",
+      "trigger": "生成 Figma 组件",
+      "parameters": [
+        {
+          "name": "figmaUrl",
+          "displayName": "Figma URL",
+          "type": "string",
+          "description": "The URL of the Figma design",
+          "required": true,
+          "placeholder": "https://www.figma.com/file/..."
+        },
+        {
+          "name": "framework",
+          "displayName": "Framework",
+          "type": "select",
+          "description": "Target framework for code generation",
+          "required": false,
+          "options": [
+            { "label": "Auto Detect", "value": "auto" },
+            { "label": "React", "value": "react" },
+            { "label": "Vue", "value": "vue" }
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "styleMode",
+          "displayName": "Style Mode",
+          "type": "select",
+          "description": "CSS styling approach",
+          "required": false,
+          "options": [
+            { "label": "Auto Detect", "value": "auto" },
+            { "label": "CSS Modules", "value": "css-modules" },
+            { "label": "Tailwind CSS", "value": "tailwind" },
+            { "label": "Plain CSS", "value": "css" }
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "outputPath",
+          "displayName": "Output Path",
+          "type": "string",
+          "description": "Directory to output generated files",
+          "required": false,
+          "placeholder": "./src/components"
+        },
+        {
+          "name": "qualityMode",
+          "displayName": "Quality Mode",
+          "type": "select",
+          "description": "Balance between speed and quality",
+          "required": false,
+          "options": [
+            { "label": "Fast", "value": "fast" },
+            { "label": "Balanced", "value": "balanced" },
+            { "label": "High Quality", "value": "high" }
+          ],
+          "default": "balanced"
+        }
+      ]
+    },
+    {
+      "name": "update_component",
+      "displayName": "Update Component",
+      "description": "Update existing component to match new Figma design",
+      "trigger": "更新组件",
+      "parameters": [
+        {
+          "name": "figmaUrl",
+          "displayName": "Figma URL",
+          "type": "string",
+          "description": "The URL of the new Figma design",
+          "required": true,
+          "placeholder": "https://www.figma.com/file/..."
+        },
+        {
+          "name": "componentPath",
+          "displayName": "Component Path",
+          "type": "string",
+          "description": "Path to the existing component file",
+          "required": true,
+          "placeholder": "./src/components/Button.tsx"
+        },
+        {
+          "name": "preserveLogic",
+          "displayName": "Preserve Business Logic",
+          "type": "boolean",
+          "description": "Keep existing business logic and state management",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "analyze_design",
+      "displayName": "Analyze Design",
+      "description": "Analyze Figma design and provide suggestions",
+      "trigger": "分析设计",
+      "parameters": [
+        {
+          "name": "figmaUrl",
+          "displayName": "Figma URL",
+          "type": "string",
+          "description": "The URL of the Figma design to analyze",
+          "required": true,
+          "placeholder": "https://www.figma.com/file/..."
+        },
+        {
+          "name": "checkConsistency",
+          "displayName": "Check Design Consistency",
+          "type": "boolean",
+          "description": "Check for design system consistency issues",
+          "required": false,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "configuration": {
+    "title": "Figma to Code Agent Configuration",
+    "properties": {
+      "figmaAccessToken": {
+        "type": "string",
+        "description": "Figma Personal Access Token for API access",
+        "secret": true,
+        "order": 1
+      },
+      "defaultFramework": {
+        "type": "string",
+        "enum": ["react", "vue", "auto"],
+        "default": "auto",
+        "description": "Default framework for code generation",
+        "order": 2
+      },
+      "defaultStyleMode": {
+        "type": "string",
+        "enum": ["css-modules", "tailwind", "css", "auto"],
+        "default": "auto",
+        "description": "Default CSS styling approach",
+        "order": 3
+      },
+      "defaultQualityMode": {
+        "type": "string",
+        "enum": ["fast", "balanced", "high"],
+        "default": "balanced",
+        "description": "Default quality mode (speed vs quality trade-off)",
+        "order": 4
+      },
+      "enableAutoDetection": {
+        "type": "boolean",
+        "default": true,
+        "description": "Automatically detect project context (framework, style, etc.)",
+        "order": 5
+      },
+      "enableIterativeMode": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable iterative optimization with user feedback",
+        "order": 6
+      },
+      "showDecisionReasoning": {
+        "type": "boolean",
+        "default": true,
+        "description": "Show AI decision reasoning in output",
+        "order": 7
+      },
+      "maxIterations": {
+        "type": "number",
+        "default": 5,
+        "minimum": 1,
+        "maximum": 10,
+        "description": "Maximum number of iterative refinement rounds",
+        "order": 8
+      },
+      "llmProvider": {
+        "type": "string",
+        "enum": ["bedrock", "openai", "anthropic"],
+        "default": "bedrock",
+        "description": "LLM provider for AI enhancements",
+        "order": 9
+      },
+      "llmModel": {
+        "type": "string",
+        "default": "anthropic.claude-3-sonnet-20240229-v1:0",
+        "description": "LLM model identifier",
+        "order": 10
+      },
+      "tokenBudget": {
+        "type": "number",
+        "default": 100000,
+        "description": "Maximum tokens per session (0 = unlimited)",
+        "order": 11
+      },
+      "enableMCPIntegration": {
+        "type": "boolean",
+        "default": true,
+        "description": "Use MCP protocol for Figma access when available",
+        "order": 12
+      },
+      "enableParallelProcessing": {
+        "type": "boolean",
+        "default": true,
+        "description": "Process independent components in parallel",
+        "order": 13
+      },
+      "verbosity": {
+        "type": "string",
+        "enum": ["minimal", "normal", "detailed"],
+        "default": "normal",
+        "description": "Output verbosity level",
+        "order": 14
+      }
+    }
+  },
+  "capabilities": {
+    "conversational": true,
+    "contextAware": true,
+    "iterative": true,
+    "multiStep": true,
+    "fileGeneration": true,
+    "codeAnalysis": true
+  },
+  "permissions": {
+    "filesystem": {
+      "read": true,
+      "write": true,
+      "description": "Read project files and write generated code"
+    },
+    "network": {
+      "domains": ["api.figma.com", "*.amazonaws.com"],
+      "description": "Access Figma API and AWS Bedrock"
+    },
+    "workspace": {
+      "read": true,
+      "description": "Analyze workspace structure and configuration"
+    }
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.987.0",
+    "axios": "^1.6.7",
+    "puppeteer": "^22.0.0"
+  },
+  "keywords": [
+    "figma",
+    "design-to-code",
+    "code-generation",
+    "react",
+    "vue",
+    "ai-agent",
+    "llm",
+    "mcp"
+  ]
+}
