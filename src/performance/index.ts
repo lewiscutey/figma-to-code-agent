@@ -3,3 +3,4 @@
  */
 
 export * from './LLMCache';
+export * from './TokenMonitor';
