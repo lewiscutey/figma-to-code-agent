@@ -2,7 +2,7 @@
 
 Convert Figma designs to production-ready React/Vue components. Supports CSS Modules, Tailwind, and plain CSS.
 
-> 📖 New here? Check the [Quick Start Guide](QUICKSTART.md) for step-by-step setup.
+> 📖 New here? Check the [Quick Start Guide](docs/QUICKSTART.md) for step-by-step setup.
 > 
 > English | [中文](README.zh-CN.md)
 
@@ -106,7 +106,7 @@ npx figma-to-code-agent \
   --preview
 ```
 
-For more usage options, see the [Quick Start Guide](QUICKSTART.md).
+For more usage options, see the [Quick Start Guide](docs/QUICKSTART.md).
 
 ## How It Works
 
@@ -145,7 +145,7 @@ For complete options, see [CLI Usage Guide](docs/CLI_GUIDE.md).
 
 ## Documentation
 
-- 📖 [Quick Start](QUICKSTART.md) - Get started in 5 minutes
+- 📖 [Quick Start](docs/QUICKSTART.md) - Get started in 5 minutes
 - 🖥️ [CLI Guide](docs/CLI_GUIDE.md) - Complete CLI reference
 - 🔌 [MCP Guide](docs/MCP_GUIDE.md) - Integrate with Claude/Kiro
 - 🎯 [Kiro Skill Guide](docs/KIRO_SKILL_GUIDE.md) - Use in Kiro IDE

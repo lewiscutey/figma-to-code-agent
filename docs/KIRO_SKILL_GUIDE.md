@@ -514,6 +514,5 @@ tail -f ~/.kiro/logs/figma-to-code.log
 
 - [CLI 使用指南](./CLI_GUIDE.md)
 - [MCP 服务配置指南](./MCP_GUIDE.md)
-- [API 文档](./API.md)
-- [示例项目](../examples/)
+- [示例资源](../assets/)
 - [Kiro 官方文档](https://kiro.dev/docs)

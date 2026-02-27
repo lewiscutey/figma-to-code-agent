@@ -2,7 +2,7 @@
 
 将 Figma 设计转换为生产就绪的 React/Vue 组件。支持 CSS Modules、Tailwind 和纯 CSS。
 
-> 📖 新手入门？查看 [快速入门指南](QUICKSTART.md) 获取详细步骤。
+> 📖 新手入门？查看 [快速入门指南](docs/QUICKSTART.md) 获取详细步骤。
 > 
 > [English](README.md) | 中文
 
@@ -106,7 +106,7 @@ npx figma-to-code-agent \
   --preview
 ```
 
-更多使用方式请查看 [快速入门指南](QUICKSTART.md)。
+更多使用方式请查看 [快速入门指南](docs/QUICKSTART.md)。
 
 ## 工作原理
 
@@ -145,7 +145,7 @@ npx figma-to-code-agent \
 
 ## 文档
 
-- 📖 [快速入门](QUICKSTART.md) - 5 分钟快速上手
+- 📖 [快速入门](docs/QUICKSTART.md) - 5 分钟快速上手
 - 🖥️ [CLI 指南](docs/CLI_GUIDE.md) - 命令行完整参考
 - 🔌 [MCP 指南](docs/MCP_GUIDE.md) - 集成到 Claude/Kiro
 - 🎯 [Kiro Skill 指南](docs/KIRO_SKILL_GUIDE.md) - Kiro IDE 使用
