@@ -428,5 +428,3 @@ Error: JavaScript heap out of memory
 
 - [MCP 服务配置指南](./MCP_GUIDE.md)
 - [Kiro Skill 使用指南](./KIRO_SKILL_GUIDE.md)
-- [API 文档](./API.md)
-- [示例项目](../examples/)
