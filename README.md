@@ -156,8 +156,24 @@ src/
 ├── config/              # Configuration management
 ├── errors/              # Error handling and recovery
 ├── llm/                 # LLM providers (Bedrock, OpenAI)
+├── agent/               # Agent core (conversation, intent, decision, execution)
+├── tools/               # Tool registry and wrappers
+├── mcp-server/          # MCP server implementation
+├── skill/               # Kiro Skill interface
+├── consistency/         # Design consistency checker
+├── prototype/           # Interactive prototype generator
+├── templates/           # Custom template system
 └── cli.ts               # CLI entry point
 ```
+
+## Documentation
+
+- 📖 [Quick Start Guide](QUICKSTART.md) - Get started in 5 minutes
+- 🖥️ [CLI Usage Guide](docs/CLI_GUIDE.md) - Complete CLI reference and examples
+- 🔌 [MCP Service Guide](docs/MCP_GUIDE.md) - Configure as MCP server for Claude/Kiro
+- 🎯 [Kiro Skill Guide](docs/KIRO_SKILL_GUIDE.md) - Use as Kiro IDE skill
+- 📚 [API Documentation](docs/API.md) - Programmatic API reference
+- 🏗️ [Architecture](spec/ARCHITECTURE.md) - System architecture and design
 
 ## Development
 
