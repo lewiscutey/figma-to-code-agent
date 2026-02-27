@@ -4,3 +4,4 @@
 
 export * from './LLMCache';
 export * from './TokenMonitor';
+export * from './ParallelProcessor';
