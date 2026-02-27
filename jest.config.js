@@ -15,6 +15,9 @@ module.exports = {
   verbose: true,
   testTimeout: 30000,
   transformIgnorePatterns: [
-    'node_modules/(?!uuid)'
-  ]
+    'node_modules/(?!(uuid)/)'
+  ],
+  moduleNameMapper: {
+    '^uuid$': require.resolve('uuid')
+  }
 };
