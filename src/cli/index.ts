@@ -3,3 +3,4 @@
  */
 
 export * from './InteractiveCLI';
+export * from './ProgressDisplay';
