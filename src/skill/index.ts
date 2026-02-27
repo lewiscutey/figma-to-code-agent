@@ -4,3 +4,4 @@
 
 export * from './types';
 export * from './SkillConfig';
+export * from './SkillInterface';

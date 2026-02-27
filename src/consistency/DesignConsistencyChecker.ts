@@ -108,46 +108,50 @@ export class DesignConsistencyChecker {
 
     this.traverseAST(ast, (node) => {
       // 提取颜色令牌
-      if (node.style?.backgroundColor) {
-        this.addToken(tokens, 'color', 'background', node.style.backgroundColor, node);
-      }
-      if (node.style?.color) {
-        this.addToken(tokens, 'color', 'text', node.style.color, node);
+      if (node.styles?.backgroundColor) {
+        const color = node.styles.backgroundColor;
+        const colorStr = `rgb(${color.r}, ${color.g}, ${color.b})`;
+        this.addToken(tokens, 'color', 'background', colorStr, node);
       }
 
       // 提取字体令牌
-      if (node.style?.fontSize) {
-        this.addToken(tokens, 'typography', 'fontSize', node.style.fontSize, node);
-      }
-      if (node.style?.fontFamily) {
-        this.addToken(tokens, 'typography', 'fontFamily', node.style.fontFamily, node);
-      }
-      if (node.style?.fontWeight) {
-        this.addToken(tokens, 'typography', 'fontWeight', node.style.fontWeight, node);
+      if (node.styles?.typography) {
+        const typo = node.styles.typography;
+        this.addToken(tokens, 'typography', 'fontSize', typo.fontSize, node);
+        this.addToken(tokens, 'typography', 'fontFamily', typo.fontFamily, node);
+        this.addToken(tokens, 'typography', 'fontWeight', typo.fontWeight, node);
       }
 
-      // 提取间距令牌
-      if (node.style?.padding) {
-        this.addToken(tokens, 'spacing', 'padding', node.style.padding, node);
+      // 提取间距令牌 (from layout)
+      if (node.layout?.padding) {
+        const padding = node.layout.padding;
+        this.addToken(tokens, 'spacing', 'padding', `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`, node);
       }
-      if (node.style?.margin) {
-        this.addToken(tokens, 'spacing', 'margin', node.style.margin, node);
+      if (node.layout?.margin) {
+        const margin = node.layout.margin;
+        this.addToken(tokens, 'spacing', 'margin', `${margin.top}px ${margin.right}px ${margin.bottom}px ${margin.left}px`, node);
       }
-      if (node.style?.gap) {
-        this.addToken(tokens, 'spacing', 'gap', node.style.gap, node);
+      if (node.layout?.gap) {
+        this.addToken(tokens, 'spacing', 'gap', node.layout.gap, node);
       }
 
       // 提取阴影令牌
-      if (node.style?.boxShadow) {
-        this.addToken(tokens, 'shadow', 'boxShadow', node.style.boxShadow, node);
+      if (node.styles?.boxShadow && node.styles.boxShadow.length > 0) {
+        const shadow = node.styles.boxShadow[0];
+        const shadowStr = `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${shadow.spread}px`;
+        this.addToken(tokens, 'shadow', 'boxShadow', shadowStr, node);
       }
 
       // 提取边框令牌
-      if (node.style?.border) {
-        this.addToken(tokens, 'border', 'border', node.style.border, node);
+      if (node.styles?.border) {
+        const border = node.styles.border;
+        const borderStr = `${border.width}px ${border.style}`;
+        this.addToken(tokens, 'border', 'border', borderStr, node);
       }
-      if (node.style?.borderRadius) {
-        this.addToken(tokens, 'border', 'borderRadius', node.style.borderRadius, node);
+      if (node.styles?.borderRadius) {
+        const radius = node.styles.borderRadius;
+        const radiusStr = Array.isArray(radius) ? radius.join('px ') + 'px' : `${radius}px`;
+        this.addToken(tokens, 'border', 'borderRadius', radiusStr, node);
       }
     });
 

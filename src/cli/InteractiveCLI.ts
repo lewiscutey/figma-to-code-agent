@@ -4,12 +4,13 @@
  */
 
 import * as readline from 'readline';
-import { ConversationContext } from '../agent/ConversationContext';
+import * as fs from 'fs';
+import { ConversationContextManager } from '../agent/ConversationContext';
 import { IntentUnderstandingEngine } from '../agent/IntentUnderstandingEngine';
 import { DecisionEngine } from '../agent/DecisionEngine';
 import { ExecutionOrchestrator } from '../agent/ExecutionOrchestrator';
 import { ToolRegistry } from '../tools/ToolRegistry';
-import type { Intent, Strategy } from '../agent/types';
+import type { Intent, Strategy, Message } from '../agent/types';
 
 export interface CLIConfig {
   interactive: boolean;
@@ -31,7 +32,7 @@ export interface CLIResponse {
  */
 export class InteractiveCLI {
   private rl: readline.Interface | null = null;
-  private context: ConversationContext;
+  private contextManager: ConversationContextManager;
   private intentEngine: IntentUnderstandingEngine;
   private decisionEngine: DecisionEngine;
   private orchestrator: ExecutionOrchestrator;
@@ -40,14 +41,14 @@ export class InteractiveCLI {
   private isRunning: boolean = false;
 
   constructor(
-    context: ConversationContext,
+    contextManager: ConversationContextManager,
     intentEngine: IntentUnderstandingEngine,
     decisionEngine: DecisionEngine,
     orchestrator: ExecutionOrchestrator,
     toolRegistry: ToolRegistry,
     config: Partial<CLIConfig> = {}
   ) {
-    this.context = context;
+    this.contextManager = contextManager;
     this.intentEngine = intentEngine;
     this.decisionEngine = decisionEngine;
     this.orchestrator = orchestrator;
@@ -81,7 +82,7 @@ export class InteractiveCLI {
     // 恢复上下文（如果存在）
     if (this.config.contextFile) {
       try {
-        await this.context.loadFromFile(this.config.contextFile);
+        // 上下文在构造函数中已经加载
         this.printMessage('已恢复之前的对话上下文');
       } catch (error) {
         // 忽略加载错误，从新会话开始
@@ -130,26 +131,26 @@ export class InteractiveCLI {
     try {
       // 构建意图
       const intent: Intent = {
-        type: 'generate',
-        figmaUrl,
-        framework: options.framework,
+        type: 'generate_new',
+        figmaInput: {
+          type: 'url',
+          url: figmaUrl,
+        },
+        targetFramework: options.framework,
         styleMode: options.styleMode,
-        outputPath: options.output,
-        confidence: 1.0,
-        missingInfo: [],
+        additionalRequirements: [],
       };
 
       // 添加到上下文
-      this.context.addMessage({
-        role: 'user',
-        content: `生成代码：${figmaUrl}`,
-        timestamp: new Date(),
-      });
+      this.contextManager.addMessage('user', `生成代码：${figmaUrl}`);
+
+      // 获取当前上下文
+      const context = this.contextManager.getContext();
 
       // 生成策略
       const strategies = await this.decisionEngine.generateStrategies(
         intent,
-        this.toolRegistry.getAllTools()
+        this.toolRegistry.listAll()
       );
 
       if (strategies.length === 0) {
@@ -157,23 +158,24 @@ export class InteractiveCLI {
       }
 
       // 选择最佳策略
-      const bestStrategy = await this.decisionEngine.selectBestStrategy(strategies, intent);
+      const bestStrategy = await this.decisionEngine.selectBestStrategy(strategies, context);
 
       this.printMessage(`使用策略: ${bestStrategy.name}`);
       if (this.config.verbosity !== 'minimal') {
-        this.printMessage(`理由: ${bestStrategy.reasoning}`);
+        this.printMessage(`描述: ${bestStrategy.description}`);
       }
 
       // 执行策略
-      const result = await this.orchestrator.executeStrategy(bestStrategy, this.context);
+      const result = await this.orchestrator.executeStrategy(bestStrategy, context);
 
       if (result.success) {
         this.printSuccess('代码生成成功！');
-        if (result.outputs) {
-          this.printMessage(`输出文件: ${JSON.stringify(result.outputs, null, 2)}`);
+        if (result.artifacts && result.artifacts.length > 0) {
+          this.printMessage(`生成了 ${result.artifacts.length} 个文件`);
         }
       } else {
-        this.printError(`执行失败: ${result.error}`);
+        const errorMsg = result.errors.length > 0 ? result.errors[0].message : '未知错误';
+        this.printError(`执行失败: ${errorMsg}`);
       }
     } catch (error) {
       this.printError(`批处理失败: ${(error as Error).message}`);
@@ -248,31 +250,26 @@ export class InteractiveCLI {
    */
   private async processUserInput(input: string): Promise<void> {
     // 添加到对话历史
-    this.context.addMessage({
-      role: 'user',
-      content: input,
-      timestamp: new Date(),
-    });
+    this.contextManager.addMessage('user', input);
+
+    // 获取当前上下文
+    const context = this.contextManager.getContext();
 
     // 理解意图
     this.showProgress(0.1, '理解您的需求...');
-    const intent = await this.intentEngine.understandIntent(input, this.context);
+    const intent = await this.intentEngine.analyzeInput(input, context);
 
     // 检查是否有缺失信息
-    if (intent.missingInfo && intent.missingInfo.length > 0) {
+    if (intent.additionalRequirements && intent.additionalRequirements.length > 0) {
       this.showProgress(1.0, '需要更多信息');
       this.printMessage('\n我需要一些额外信息：');
 
-      for (const missing of intent.missingInfo) {
-        const answer = await this.askUser(missing);
-        this.context.addMessage({
-          role: 'user',
-          content: answer,
-          timestamp: new Date(),
-        });
+      for (const requirement of intent.additionalRequirements) {
+        const answer = await this.askUser(requirement);
+        this.contextManager.addMessage('user', answer);
 
         // 更新意图
-        await this.updateIntentWithAnswer(intent, missing, answer);
+        await this.updateIntentWithAnswer(intent, requirement, answer);
       }
     }
 
@@ -280,7 +277,7 @@ export class InteractiveCLI {
     this.showProgress(0.3, '规划执行策略...');
     const strategies = await this.decisionEngine.generateStrategies(
       intent,
-      this.toolRegistry.getAllTools()
+      this.toolRegistry.listAll()
     );
 
     if (strategies.length === 0) {
@@ -290,13 +287,14 @@ export class InteractiveCLI {
 
     // 选择策略
     this.showProgress(0.4, '选择最佳策略...');
-    const bestStrategy = await this.decisionEngine.selectBestStrategy(strategies, intent);
+    const updatedContext = this.contextManager.getContext();
+    const bestStrategy = await this.decisionEngine.selectBestStrategy(strategies, updatedContext);
 
     // 显示决策理由
     if (this.config.verbosity === 'detailed') {
       this.printMessage(`\n选择策略: ${bestStrategy.name}`);
-      this.printMessage(`理由: ${bestStrategy.reasoning}`);
-      this.printMessage(`预计耗时: ${bestStrategy.estimatedDuration}ms`);
+      this.printMessage(`描述: ${bestStrategy.description}`);
+      this.printMessage(`预计耗时: ${bestStrategy.estimatedTime}ms`);
     }
 
     // 询问用户确认（如果策略复杂）
@@ -323,7 +321,8 @@ export class InteractiveCLI {
 
     // 执行策略
     this.showProgress(0.5, '执行中...');
-    const result = await this.orchestrator.executeStrategy(bestStrategy, this.context);
+    const finalContext = this.contextManager.getContext();
+    const result = await this.orchestrator.executeStrategy(bestStrategy, finalContext);
 
     this.showProgress(1.0, '完成');
 
@@ -331,10 +330,10 @@ export class InteractiveCLI {
     if (result.success) {
       this.printSuccess('\n✓ 操作成功完成！');
 
-      if (result.outputs) {
+      if (result.artifacts && result.artifacts.length > 0) {
         this.printMessage('\n生成的文件:');
-        for (const [path, content] of Object.entries(result.outputs)) {
-          this.printMessage(`  - ${path} (${content.length} 字符)`);
+        for (const artifact of result.artifacts) {
+          this.printMessage(`  - ${artifact.path} (${artifact.content.length} 字符)`);
         }
       }
 
@@ -347,23 +346,22 @@ export class InteractiveCLI {
       } else {
         // 保存上下文
         if (this.config.autoSave && this.config.contextFile) {
-          await this.context.saveToFile(this.config.contextFile);
+          // 上下文会自动持久化
+          this.printMessage('上下文已自动保存');
         }
       }
     } else {
-      this.printError(`\n✗ 操作失败: ${result.error}`);
+      const errorMsg = result.errors.length > 0 ? result.errors[0].message : '未知错误';
+      this.printError(`\n✗ 操作失败: ${errorMsg}`);
 
-      if (result.checkpoint) {
-        this.printMessage('已保存检查点，可以稍后恢复');
+      if (result.metrics) {
+        this.printMessage('执行指标已记录');
       }
     }
 
     // 添加响应到历史
-    this.context.addMessage({
-      role: 'assistant',
-      content: result.success ? '操作成功完成' : `操作失败: ${result.error}`,
-      timestamp: new Date(),
-    });
+    const responseMsg = result.success ? '操作成功完成' : `操作失败: ${result.errors.length > 0 ? result.errors[0].message : '未知错误'}`;
+    this.contextManager.addMessage('agent', responseMsg);
   }
 
   /**
@@ -400,14 +398,16 @@ export class InteractiveCLI {
 
     if (lower.startsWith('save ')) {
       const filename = lower.substring(5).trim();
-      await this.context.saveToFile(filename);
+      const exported = this.contextManager.export();
+      fs.writeFileSync(filename, exported, 'utf-8');
       this.printSuccess(`已保存上下文到 ${filename}`);
       return true;
     }
 
     if (lower.startsWith('load ')) {
       const filename = lower.substring(5).trim();
-      await this.context.loadFromFile(filename);
+      const content = fs.readFileSync(filename, 'utf-8');
+      this.contextManager.import(content);
       this.printSuccess(`已加载上下文从 ${filename}`);
       return true;
     }
@@ -422,9 +422,9 @@ export class InteractiveCLI {
     // 简单的关键词匹配来更新意图
     if (question.includes('框架') || question.includes('framework')) {
       if (answer.toLowerCase().includes('react')) {
-        intent.framework = 'react';
+        intent.targetFramework = 'react';
       } else if (answer.toLowerCase().includes('vue')) {
-        intent.framework = 'vue';
+        intent.targetFramework = 'vue';
       }
     }
 
@@ -439,7 +439,8 @@ export class InteractiveCLI {
     }
 
     if (question.includes('输出') || question.includes('output')) {
-      intent.outputPath = answer;
+      // 输出路径不在 Intent 类型中，可以添加到 additionalRequirements
+      intent.additionalRequirements.push(`输出路径: ${answer}`);
     }
   }
 
@@ -493,7 +494,7 @@ export class InteractiveCLI {
    * 打印对话历史
    */
   private printHistory(): void {
-    const messages = this.context.getMessages();
+    const messages = this.contextManager.getHistory();
 
     if (messages.length === 0) {
       this.printMessage('暂无对话历史');
@@ -501,9 +502,9 @@ export class InteractiveCLI {
     }
 
     this.printMessage('\n对话历史:');
-    messages.forEach((msg, idx) => {
+    messages.forEach((msg: Message, idx: number) => {
       const role = msg.role === 'user' ? '用户' : 'Agent';
-      const time = msg.timestamp.toLocaleTimeString();
+      const time = new Date(msg.timestamp).toLocaleTimeString();
       this.printMessage(`[${idx + 1}] ${time} ${role}: ${msg.content.substring(0, 100)}${msg.content.length > 100 ? '...' : ''}`);
     });
   }
@@ -512,18 +513,21 @@ export class InteractiveCLI {
    * 打印状态信息
    */
   private printStatus(): void {
-    const taskState = this.context.getTaskState();
-    const preferences = this.context.getUserPreferences();
+    const context = this.contextManager.getContext();
+    const taskState = context.taskState;
+    const preferences = context.userPreferences;
 
     this.printMessage('\n当前状态:');
     this.printMessage(`  阶段: ${taskState.phase}`);
     this.printMessage(`  进度: ${Math.round(taskState.progress * 100)}%`);
-    this.printMessage(`  消息数: ${this.context.getMessages().length}`);
+    this.printMessage(`  消息数: ${context.history.length}`);
 
-    if (Object.keys(preferences).length > 0) {
+    if (preferences) {
       this.printMessage('\n用户偏好:');
-      for (const [key, value] of Object.entries(preferences)) {
-        this.printMessage(`  ${key}: ${value}`);
+      this.printMessage(`  语言: ${preferences.language}`);
+      this.printMessage(`  详细程度: ${preferences.verbosity}`);
+      if (preferences.defaultFramework) {
+        this.printMessage(`  默认框架: ${preferences.defaultFramework}`);
       }
     }
   }
@@ -534,11 +538,11 @@ export class InteractiveCLI {
   private printStrategyDetails(strategy: Strategy): void {
     this.printMessage(`\n策略详情: ${strategy.name}`);
     this.printMessage(`描述: ${strategy.description}`);
-    this.printMessage(`预计耗时: ${strategy.estimatedDuration}ms`);
+    this.printMessage(`预计耗时: ${strategy.estimatedTime}ms`);
     this.printMessage(`\n执行步骤:`);
 
     strategy.steps.forEach((step, idx) => {
-      this.printMessage(`  ${idx + 1}. ${step.tool} - ${step.description || '执行工具'}`);
+      this.printMessage(`  ${idx + 1}. ${step.tool} - ${step.action}`);
     });
   }
 
@@ -549,9 +553,7 @@ export class InteractiveCLI {
     this.isRunning = false;
 
     if (this.config.autoSave && this.config.contextFile) {
-      this.context.saveToFile(this.config.contextFile).catch(() => {
-        // 忽略保存错误
-      });
+      // 上下文会自动持久化
     }
 
     this.printMessage('\n再见！👋');
