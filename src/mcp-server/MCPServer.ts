@@ -4,7 +4,7 @@
  */
 
 import * as readline from 'readline';
-import { ConversationContext } from '../agent/ConversationContext';
+import { ConversationContextManager } from '../agent/ConversationContext';
 import { IntentUnderstandingEngine } from '../agent/IntentUnderstandingEngine';
 import { DecisionEngine } from '../agent/DecisionEngine';
 import { ExecutionOrchestrator } from '../agent/ExecutionOrchestrator';
@@ -52,7 +52,7 @@ export interface MCPServerConfig {
 export class MCPServer {
   private config: MCPServerConfig;
   private tools: Map<string, MCPTool> = new Map();
-  private context: ConversationContext;
+  private contextManager: ConversationContextManager;
   private intentEngine: IntentUnderstandingEngine;
   private decisionEngine: DecisionEngine;
   private orchestrator: ExecutionOrchestrator;
@@ -61,14 +61,14 @@ export class MCPServer {
   private rl: readline.Interface | null = null;
 
   constructor(
-    context: ConversationContext,
+    contextManager: ConversationContextManager,
     intentEngine: IntentUnderstandingEngine,
     decisionEngine: DecisionEngine,
     orchestrator: ExecutionOrchestrator,
     toolRegistry: ToolRegistry,
     config: Partial<MCPServerConfig> = {}
   ) {
-    this.context = context;
+    this.contextManager = contextManager;
     this.intentEngine = intentEngine;
     this.decisionEngine = decisionEngine;
     this.orchestrator = orchestrator;
@@ -342,132 +342,161 @@ export class MCPServer {
    * 处理 figma_to_code 工具调用
    */
   private async handleFigmaToCode(inputs: any): Promise<any> {
-    const { figmaUrl, framework, styleMode, outputPath } = inputs;
+      const { figmaUrl, framework, styleMode } = inputs;
 
-    // 构建意图
-    const intent = await this.intentEngine.understandIntent(
-      `生成代码：${figmaUrl}`,
-      this.context
-    );
+      const context = this.contextManager.getContext();
 
-    intent.figmaUrl = figmaUrl;
-    intent.framework = framework;
-    intent.styleMode = styleMode;
-    intent.outputPath = outputPath;
+      // 构建意图
+      const intent = await this.intentEngine.analyzeInput(
+        `生成代码：${figmaUrl}`,
+        context
+      );
 
-    // 生成策略
-    const strategies = await this.decisionEngine.generateStrategies(
-      intent,
-      this.toolRegistry.getAllTools()
-    );
+      // 覆盖参数
+      if (framework) {
+        intent.targetFramework = framework;
+      }
+      if (styleMode) {
+        intent.styleMode = styleMode;
+      }
 
-    if (strategies.length === 0) {
-      throw new Error('无法生成执行策略');
+      // 生成策略
+      const strategies = this.decisionEngine.generateStrategies(
+        intent,
+        this.toolRegistry.listAll()
+      );
+
+      if (strategies.length === 0) {
+        throw new Error('无法生成执行策略');
+      }
+
+      // 选择最佳策略
+      const bestStrategy = this.decisionEngine.selectBestStrategy(strategies, context);
+
+      // 执行策略
+      const result = await this.orchestrator.executeStrategy(bestStrategy, context);
+
+      if (!result.success) {
+        const errorMsg = result.errors.length > 0 ? result.errors[0].message : '执行失败';
+        throw new Error(errorMsg);
+      }
+
+      // 提取生成的文件
+      const files: Record<string, string> = {};
+      for (const artifact of result.artifacts) {
+        if (artifact.type === 'code' || artifact.type === 'config') {
+          files[artifact.path] = artifact.content;
+        }
+      }
+
+      return {
+        success: true,
+        outputs: files,
+        message: '代码生成成功',
+      };
     }
-
-    // 选择最佳策略
-    const bestStrategy = await this.decisionEngine.selectBestStrategy(strategies, intent);
-
-    // 执行策略
-    const result = await this.orchestrator.executeStrategy(bestStrategy, this.context);
-
-    if (!result.success) {
-      throw new Error(result.error || '执行失败');
-    }
-
-    return {
-      success: true,
-      outputs: result.outputs,
-      message: '代码生成成功',
-    };
-  }
 
   /**
    * 处理 analyze_design 工具调用
    */
   private async handleAnalyzeDesign(inputs: any): Promise<any> {
-    const { figmaUrl } = inputs;
+      const { figmaUrl } = inputs;
 
-    // 构建意图
-    const intent = await this.intentEngine.understandIntent(
-      `分析设计：${figmaUrl}`,
-      this.context
-    );
+      const context = this.contextManager.getContext();
 
-    intent.type = 'analyze';
-    intent.figmaUrl = figmaUrl;
+      // 构建意图
+      const intent = await this.intentEngine.analyzeInput(
+        `分析设计：${figmaUrl}`,
+        context
+      );
 
-    // 生成策略
-    const strategies = await this.decisionEngine.generateStrategies(
-      intent,
-      this.toolRegistry.getAllTools()
-    );
+      intent.type = 'analyze';
 
-    if (strategies.length === 0) {
-      throw new Error('无法生成分析策略');
+      // 生成策略
+      const strategies = this.decisionEngine.generateStrategies(
+        intent,
+        this.toolRegistry.listAll()
+      );
+
+      if (strategies.length === 0) {
+        throw new Error('无法生成分析策略');
+      }
+
+      // 选择最佳策略
+      const bestStrategy = this.decisionEngine.selectBestStrategy(strategies, context);
+
+      // 执行策略
+      const result = await this.orchestrator.executeStrategy(bestStrategy, context);
+
+      if (!result.success) {
+        const errorMsg = result.errors.length > 0 ? result.errors[0].message : '分析失败';
+        throw new Error(errorMsg);
+      }
+
+      // 从 artifacts 中提取分析结果
+      const analysis = result.artifacts.find((a) => a.type === 'documentation');
+      const analysisData = analysis ? JSON.parse(analysis.content) : {};
+
+      return {
+        success: true,
+        analysis: analysisData,
+        suggestions: analysisData.suggestions || [],
+        message: '设计分析完成',
+      };
     }
-
-    // 选择最佳策略
-    const bestStrategy = await this.decisionEngine.selectBestStrategy(strategies, intent);
-
-    // 执行策略
-    const result = await this.orchestrator.executeStrategy(bestStrategy, this.context);
-
-    if (!result.success) {
-      throw new Error(result.error || '分析失败');
-    }
-
-    return {
-      success: true,
-      analysis: result.outputs,
-      suggestions: result.suggestions || [],
-      message: '设计分析完成',
-    };
-  }
 
   /**
    * 处理 update_component 工具调用
    */
   private async handleUpdateComponent(inputs: any): Promise<any> {
-    const { figmaUrl, componentPath } = inputs;
+      const { figmaUrl, componentPath } = inputs;
 
-    // 构建意图
-    const intent = await this.intentEngine.understandIntent(
-      `更新组件：${componentPath}，使用设计：${figmaUrl}`,
-      this.context
-    );
+      const context = this.contextManager.getContext();
 
-    intent.type = 'update';
-    intent.figmaUrl = figmaUrl;
-    intent.componentPath = componentPath;
+      // 构建意图
+      const intent = await this.intentEngine.analyzeInput(
+        `更新组件：${componentPath}，使用设计：${figmaUrl}`,
+        context
+      );
 
-    // 生成策略
-    const strategies = await this.decisionEngine.generateStrategies(
-      intent,
-      this.toolRegistry.getAllTools()
-    );
+      intent.type = 'update_existing';
 
-    if (strategies.length === 0) {
-      throw new Error('无法生成更新策略');
+      // 生成策略
+      const strategies = this.decisionEngine.generateStrategies(
+        intent,
+        this.toolRegistry.listAll()
+      );
+
+      if (strategies.length === 0) {
+        throw new Error('无法生成更新策略');
+      }
+
+      // 选择最佳策略
+      const bestStrategy = this.decisionEngine.selectBestStrategy(strategies, context);
+
+      // 执行策略
+      const result = await this.orchestrator.executeStrategy(bestStrategy, context);
+
+      if (!result.success) {
+        const errorMsg = result.errors.length > 0 ? result.errors[0].message : '更新失败';
+        throw new Error(errorMsg);
+      }
+
+      // 提取更新的文件
+      const files: Record<string, string> = {};
+      for (const artifact of result.artifacts) {
+        if (artifact.type === 'code' || artifact.type === 'config') {
+          files[artifact.path] = artifact.content;
+        }
+      }
+
+      return {
+        success: true,
+        updatedFiles: files,
+        diff: {}, // TODO: Implement diff calculation
+        message: '组件更新成功',
+      };
     }
-
-    // 选择最佳策略
-    const bestStrategy = await this.decisionEngine.selectBestStrategy(strategies, intent);
-
-    // 执行策略
-    const result = await this.orchestrator.executeStrategy(bestStrategy, this.context);
-
-    if (!result.success) {
-      throw new Error(result.error || '更新失败');
-    }
-
-    return {
-      success: true,
-      updatedFiles: result.outputs,
-      diff: result.diff || {},
-      message: '组件更新成功',
-    };
-  }
 
   /**
    * 验证输入

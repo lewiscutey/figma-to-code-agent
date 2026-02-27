@@ -78,7 +78,7 @@ export interface SkillProgress {
   progress: number; // 0-100
   message: string;
   estimatedTimeRemaining?: number;
-  currentStep?: string;
+  currentStep?: number;
   totalSteps?: number;
 }
 
