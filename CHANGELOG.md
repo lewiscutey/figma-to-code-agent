@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.7.0] - 2026-02-27
+
+### Added
+- MCP (Model Context Protocol) server implementation for integration with Claude Desktop and Kiro IDE
+- Kiro Skill interface for seamless design-to-code workflow in Kiro IDE
+- Design consistency checker for analyzing design token consistency
+- Interactive prototype generator with state management
+- Custom template system for code generation
+- Comprehensive property-based tests for agent components (ConversationContext, DecisionEngine, ExecutionOrchestrator, IntentUnderstandingEngine)
+- Property-based tests for ToolRegistry
+- End-to-end agent workflow tests
+- Cross-delivery consistency integration tests
+- Agent architecture with conversation context, intent understanding, decision engine, and execution orchestrator
+
+### Changed
+- Updated README with bilingual support (English and Chinese)
+- Refined documentation structure and removed redundant content
+- Fixed broken documentation links
+- Improved CLI guide with comprehensive examples and troubleshooting
+
+### Documentation
+- Added MCP Service Configuration Guide (docs/MCP_GUIDE.md)
+- Added Kiro Skill Usage Guide (docs/KIRO_SKILL_GUIDE.md)
+- Added CLI Usage Guide (docs/CLI_GUIDE.md)
+- Created README.zh-CN.md for Chinese documentation
+- Updated QUICKSTART.md with clearer instructions
+
+### Tests
+- Total test count: 222 tests (all passing)
+- Added 7 new test files for agent components and integrations
+- Updated jest.config.js to handle uuid module transformation
+
 ## [0.6.0] - 2026-02-13
 
 ### Added
