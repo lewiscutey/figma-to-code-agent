@@ -29,7 +29,7 @@ describe('LLMCache', () => {
     // 清理测试缓存目录
     if (fs.existsSync(testCacheDir)) {
       fs.rmSync(testCacheDir, { recursive: true, force: true });
-    });
+    }
   });
 
   describe('get and set', () => {
