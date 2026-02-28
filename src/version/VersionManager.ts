@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'crypto';
 
 export interface Version {
   id: string;
@@ -77,7 +77,7 @@ export class VersionManager {
     description: string = 'Auto-generated version'
   ): Promise<Version> {
     const version: Version = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       timestamp: new Date(),
       description,
       files,
@@ -289,7 +289,7 @@ export class VersionManager {
     };
 
     // 生成新的 ID 避免冲突
-    version.id = uuidv4();
+    version.id = crypto.randomUUID();
     version.metadata.parentVersionId = undefined;
 
     await this.saveVersion(version);

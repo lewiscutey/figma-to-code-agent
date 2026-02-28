@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.8.0] - 2026-02-28
+
+### Added
+- Version management system (VersionManager) for tracking code generation history
+- Feedback loop system (FeedbackLoop) for iterative improvement based on user feedback
+- LLM response caching (LLMCache) with TTL and LRU eviction
+- Token usage monitoring (TokenMonitor) with budget management and cost tracking
+- Parallel processing (ParallelProcessor) for concurrent component generation
+- Version comparison and diff generation
+- Version rollback functionality
+- Feedback analysis with automatic change detection
+- Cache persistence to disk
+- Token usage statistics by model and operation
+- Component independence analysis for parallel execution
+
+### Changed
+- Replaced uuid package with crypto.randomUUID for version ID generation
+- Enhanced performance optimization capabilities
+- Improved iteration tracking and management
+
+### Tests
+- Added 79 new tests for Phase 3 modules
+- Total test count: 533+ tests (all passing)
+- Added comprehensive unit tests for VersionManager (20 tests)
+- Added comprehensive unit tests for FeedbackLoop (15 tests)
+- Added comprehensive unit tests for LLMCache (18 tests)
+- Added comprehensive unit tests for TokenMonitor (14 tests)
+- Added comprehensive unit tests for ParallelProcessor (12 tests)
+
 ## [0.7.0] - 2026-02-27
 
 ### Added
