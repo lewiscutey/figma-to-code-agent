@@ -1,0 +1,434 @@
+{
+  "$schema": "https://anthropic.com/schemas/claude-skills-v1.json",
+  "name": "figma-to-code",
+  "displayName": "Figma to Code Agent",
+  "version": "0.8.0",
+  "description": "AI-powered tool that converts Figma designs to production-ready React/Vue code with intelligent decision-making",
+  "author": {
+    "name": "lewiscutey",
+    "url": "https://github.com/lewiscutey"
+  },
+  "icon": "🎨",
+  "category": "development",
+  "tags": [
+    "figma",
+    "code-generation",
+    "react",
+    "vue",
+    "design-to-code",
+    "ai-agent"
+  ],
+  "homepage": "https://github.com/lewiscutey/figma-to-code-agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lewiscutey/figma-to-code-agent.git"
+  },
+  "license": "MIT",
+  "runtime": {
+    "type": "node",
+    "version": ">=18.0.0",
+    "command": "figma-to-code-mcp",
+    "args": []
+  },
+  "capabilities": {
+    "conversational": true,
+    "contextAware": true,
+    "iterative": true,
+    "multiStep": true,
+    "fileGeneration": true,
+    "codeAnalysis": true,
+    "streaming": false
+  },
+  "tools": [
+    {
+      "name": "figma_to_code",
+      "displayName": "Generate Code from Figma",
+      "description": "Convert Figma design to production-ready React or Vue code with intelligent layout inference and AI enhancements",
+      "category": "code-generation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "figmaUrl": {
+            "type": "string",
+            "description": "The URL of the Figma design (file URL or node URL)",
+            "pattern": "^https://www\\.figma\\.com/",
+            "examples": [
+              "https://www.figma.com/file/abc123/MyDesign",
+              "https://www.figma.com/file/abc123/MyDesign?node-id=1:2"
+            ]
+          },
+          "framework": {
+            "type": "string",
+            "description": "Target framework for code generation",
+            "enum": ["react", "vue", "auto"],
+            "default": "auto"
+          },
+          "styleMode": {
+            "type": "string",
+            "description": "CSS styling approach",
+            "enum": ["css-modules", "tailwind", "css", "auto"],
+            "default": "auto"
+          },
+          "outputPath": {
+            "type": "string",
+            "description": "Directory to output generated files (relative to workspace root)",
+            "default": "./output"
+          },
+          "qualityMode": {
+            "type": "string",
+            "description": "Balance between speed and quality",
+            "enum": ["fast", "balanced", "high"],
+            "default": "balanced"
+          },
+          "enableAI": {
+            "type": "boolean",
+            "description": "Enable AI enhancements for better naming and code quality",
+            "default": false
+          },
+          "extractTokens": {
+            "type": "boolean",
+            "description": "Extract design tokens (colors, typography, spacing)",
+            "default": false
+          }
+        },
+        "required": ["figmaUrl"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the code generation was successful"
+          },
+          "files": {
+            "type": "array",
+            "description": "List of generated files",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "File path relative to output directory"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": ["component", "style", "asset", "token"],
+                  "description": "Type of generated file"
+                }
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "description": "Generation summary",
+            "properties": {
+              "componentsGenerated": {
+                "type": "number"
+              },
+              "assetsDownloaded": {
+                "type": "number"
+              },
+              "tokensExtracted": {
+                "type": "number"
+              }
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable result message"
+          }
+        }
+      },
+      "examples": [
+        {
+          "input": {
+            "figmaUrl": "https://www.figma.com/file/abc123/LoginPage",
+            "framework": "react",
+            "styleMode": "css-modules"
+          },
+          "output": {
+            "success": true,
+            "files": [
+              {
+                "path": "LoginPage.tsx",
+                "type": "component"
+              },
+              {
+                "path": "LoginPage.module.css",
+                "type": "style"
+              }
+            ],
+            "message": "Successfully generated React component with CSS Modules"
+          }
+        }
+      ]
+    },
+    {
+      "name": "analyze_design",
+      "displayName": "Analyze Figma Design",
+      "description": "Analyze Figma design for accessibility, performance, and design system consistency issues",
+      "category": "analysis",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "figmaUrl": {
+            "type": "string",
+            "description": "The URL of the Figma design to analyze",
+            "pattern": "^https://www\\.figma\\.com/"
+          },
+          "checkAccessibility": {
+            "type": "boolean",
+            "description": "Check for accessibility issues (missing alt text, ARIA labels, etc.)",
+            "default": true
+          },
+          "checkPerformance": {
+            "type": "boolean",
+            "description": "Check for performance issues (large images, complex layouts, etc.)",
+            "default": true
+          },
+          "checkConsistency": {
+            "type": "boolean",
+            "description": "Check for design system consistency issues",
+            "default": true
+          }
+        },
+        "required": ["figmaUrl"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "analysis": {
+            "type": "object",
+            "properties": {
+              "complexity": {
+                "type": "string",
+                "enum": ["simple", "medium", "complex"]
+              },
+              "nodeCount": {
+                "type": "number"
+              },
+              "issues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["accessibility", "performance", "consistency"]
+                    },
+                    "severity": {
+                      "type": "string",
+                      "enum": ["low", "medium", "high"]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "suggestions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "update_component",
+      "displayName": "Update Component from Figma",
+      "description": "Update existing component to match new Figma design while preserving business logic",
+      "category": "code-generation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "figmaUrl": {
+            "type": "string",
+            "description": "The URL of the new Figma design",
+            "pattern": "^https://www\\.figma\\.com/"
+          },
+          "componentPath": {
+            "type": "string",
+            "description": "Path to the existing component file (relative to workspace root)"
+          },
+          "preserveLogic": {
+            "type": "boolean",
+            "description": "Preserve existing business logic and state management",
+            "default": true
+          },
+          "updateMode": {
+            "type": "string",
+            "description": "How to handle updates",
+            "enum": ["styles-only", "structure-only", "full"],
+            "default": "full"
+          }
+        },
+        "required": ["figmaUrl", "componentPath"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "updatedFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "changes": {
+            "type": "object",
+            "properties": {
+              "added": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "modified": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "removed": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "type": "object",
+    "properties": {
+      "figmaAccessToken": {
+        "type": "string",
+        "description": "Figma Personal Access Token for API access",
+        "secret": true,
+        "required": true,
+        "validation": {
+          "pattern": "^figd_[a-zA-Z0-9_-]+$",
+          "message": "Must be a valid Figma access token starting with 'figd_'"
+        }
+      },
+      "defaultFramework": {
+        "type": "string",
+        "description": "Default framework for code generation",
+        "enum": ["react", "vue", "auto"],
+        "default": "auto"
+      },
+      "defaultStyleMode": {
+        "type": "string",
+        "description": "Default CSS styling approach",
+        "enum": ["css-modules", "tailwind", "css", "auto"],
+        "default": "auto"
+      },
+      "defaultQualityMode": {
+        "type": "string",
+        "description": "Default quality mode (speed vs quality trade-off)",
+        "enum": ["fast", "balanced", "high"],
+        "default": "balanced"
+      },
+      "enableAIByDefault": {
+        "type": "boolean",
+        "description": "Enable AI enhancements by default",
+        "default": false
+      },
+      "llmProvider": {
+        "type": "string",
+        "description": "LLM provider for AI enhancements (requires API keys)",
+        "enum": ["bedrock", "openai", "anthropic", "none"],
+        "default": "none"
+      },
+      "llmModel": {
+        "type": "string",
+        "description": "LLM model identifier",
+        "default": "anthropic.claude-3-sonnet-20240229-v1:0"
+      },
+      "tokenBudget": {
+        "type": "number",
+        "description": "Maximum tokens per session (0 = unlimited)",
+        "default": 100000,
+        "minimum": 0
+      },
+      "enableCache": {
+        "type": "boolean",
+        "description": "Enable caching of Figma data and LLM responses",
+        "default": true
+      },
+      "cacheTTL": {
+        "type": "number",
+        "description": "Cache time-to-live in seconds",
+        "default": 86400
+      },
+      "verbosity": {
+        "type": "string",
+        "description": "Output verbosity level",
+        "enum": ["minimal", "normal", "detailed"],
+        "default": "normal"
+      }
+    }
+  },
+  "permissions": {
+    "filesystem": {
+      "read": ["**/*"],
+      "write": ["output/**/*", "src/**/*"],
+      "description": "Read project files and write generated code"
+    },
+    "network": {
+      "domains": [
+        "api.figma.com",
+        "*.amazonaws.com",
+        "api.openai.com",
+        "api.anthropic.com"
+      ],
+      "description": "Access Figma API and LLM providers"
+    },
+    "environment": {
+      "read": [
+        "FIGMA_TOKEN",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY"
+      ],
+      "description": "Read API credentials from environment variables"
+    }
+  },
+  "installation": {
+    "npm": {
+      "package": "figma-to-code-agent",
+      "global": true
+    },
+    "requirements": {
+      "node": ">=18.0.0",
+      "npm": ">=9.0.0"
+    }
+  },
+  "documentation": {
+    "quickstart": "https://github.com/lewiscutey/figma-to-code-agent#quickstart",
+    "guide": "https://github.com/lewiscutey/figma-to-code-agent/blob/main/docs/MCP_UNIVERSAL_GUIDE.md",
+    "api": "https://github.com/lewiscutey/figma-to-code-agent#api",
+    "examples": "https://github.com/lewiscutey/figma-to-code-agent/tree/main/assets"
+  },
+  "support": {
+    "issues": "https://github.com/lewiscutey/figma-to-code-agent/issues",
+    "discussions": "https://github.com/lewiscutey/figma-to-code-agent/discussions",
+    "email": "support@example.com"
+  }
+}
