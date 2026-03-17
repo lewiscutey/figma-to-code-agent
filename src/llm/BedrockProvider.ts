@@ -21,15 +21,30 @@ export class BedrockProvider implements LLMProvider {
       }),
     });
 
-    const response = await this.client.send(command);
-    const result = JSON.parse(new TextDecoder().decode(response.body));
+    try {
+      const response = await this.client.send(command);
+      if (!response.body) {
+        throw new Error('Bedrock returned empty response body');
+      }
 
-    return {
-      content: result.content[0].text,
-      usage: {
-        inputTokens: result.usage.input_tokens,
-        outputTokens: result.usage.output_tokens,
-      },
-    };
+      const result = JSON.parse(new TextDecoder().decode(response.body));
+
+      if (!result.content || !Array.isArray(result.content) || result.content.length === 0) {
+        throw new Error('Bedrock returned empty content array');
+      }
+
+      return {
+        content: result.content[0].text,
+        usage: result.usage
+          ? { inputTokens: result.usage.input_tokens, outputTokens: result.usage.output_tokens }
+          : undefined,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('Bedrock')) {
+        throw error;
+      }
+      const msg = error instanceof Error ? error.message : String(error);
+      throw new Error(`Bedrock API error: ${msg}`);
+    }
   }
 }

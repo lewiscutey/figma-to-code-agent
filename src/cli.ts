@@ -47,18 +47,46 @@ Example:
 
   const preview = args.includes('--preview');
 
+  const frameworkArg = getArg('--framework', args) || 'react';
+  const validFrameworks = ['react', 'vue'];
+  if (!validFrameworks.includes(frameworkArg)) {
+    console.error(`Error: Invalid framework "${frameworkArg}". Supported: ${validFrameworks.join(', ')}`);
+    process.exit(1);
+  }
+
+  const styleModeArg = getArg('--style', args) || 'css-modules';
+  const validStyleModes = ['css-modules', 'tailwind', 'css'];
+  if (!validStyleModes.includes(styleModeArg)) {
+    console.error(`Error: Invalid style mode "${styleModeArg}". Supported: ${validStyleModes.join(', ')}`);
+    process.exit(1);
+  }
+
+  const extractTokensArg = getArg('--extract-tokens', args);
+  const validTokenFormats = ['css', 'scss', 'json', 'js'];
+  if (extractTokensArg && !validTokenFormats.includes(extractTokensArg)) {
+    console.error(`Error: Invalid token format "${extractTokensArg}". Supported: ${validTokenFormats.join(', ')}`);
+    process.exit(1);
+  }
+
+  const llmProviderArg = getArg('--llm-provider', args);
+  const validLLMProviders = ['bedrock', 'openai', 'anthropic'];
+  if (llmProviderArg && !validLLMProviders.includes(llmProviderArg)) {
+    console.error(`Error: Invalid LLM provider "${llmProviderArg}". Supported: ${validLLMProviders.join(', ')}`);
+    process.exit(1);
+  }
+
   const config = {
     figmaToken: getArg('--token', args) || process.env.FIGMA_TOKEN || '',
     fileKey: getArg('--file', args) || '',
     nodeIds: getArgs('--node', args),
-    framework: (getArg('--framework', args) || 'react') as 'react' | 'vue',
-    styleMode: (getArg('--style', args) || 'css-modules') as 'css-modules' | 'tailwind' | 'css',
+    framework: frameworkArg as 'react' | 'vue',
+    styleMode: styleModeArg as 'css-modules' | 'tailwind' | 'css',
     typescript: args.includes('--typescript'),
     outputDir: getArg('--output', args) || './output',
-    extractTokens: getArg('--extract-tokens', args) as 'css' | 'scss' | 'json' | 'js' | undefined,
-    llm: getArg('--llm-provider', args)
+    extractTokens: extractTokensArg as 'css' | 'scss' | 'json' | 'js' | undefined,
+    llm: llmProviderArg
       ? {
-          provider: getArg('--llm-provider', args) as 'bedrock' | 'openai' | 'anthropic',
+          provider: llmProviderArg as 'bedrock' | 'openai' | 'anthropic',
           model: getArg('--llm-model', args) || '',
           region: getArg('--llm-region', args),
           apiKey: getArg('--llm-api-key', args) || process.env.LLM_API_KEY,

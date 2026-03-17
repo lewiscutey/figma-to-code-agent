@@ -172,7 +172,7 @@ export class FigmaToCodeAgent {
         console.log(`✓ Using cached image: ${fileName}`);
         node.metadata.imageRef = `./assets/${fileName}`;
         if (node.type !== 'Image') {
-          (node as any).type = 'Image';
+          node.type = 'Image';
           node.children = [];
         }
       } else {
@@ -201,7 +201,7 @@ export class FigmaToCodeAgent {
               await this.figmaClient.downloadImage(imageUrl, filePath);
               node.metadata.imageRef = `./assets/${fileName}`;
               if (node.type !== 'Image') {
-                (node as any).type = 'Image';
+                node.type = 'Image';
                 node.children = [];
               }
             } catch (err) {

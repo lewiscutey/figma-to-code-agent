@@ -23,12 +23,18 @@ export class TransformationPipeline {
   }
 
   /**
-   * Execute all transformers in sequence
+   * Execute all transformers in sequence.
+   * If a transformer fails, logs a warning and continues with the previous node state.
    */
   async execute(node: ASTNode): Promise<ASTNode> {
     let currentNode = node;
     for (const transformer of this.transformers) {
-      currentNode = await transformer.transform(currentNode);
+      try {
+        currentNode = await transformer.transform(currentNode);
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn(`⚠ Transformer "${transformer.name}" failed: ${msg}. Skipping.`);
+      }
     }
     return currentNode;
   }

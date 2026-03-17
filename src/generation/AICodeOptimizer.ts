@@ -6,10 +6,18 @@ export class AICodeOptimizer {
 
   async optimize(files: GeneratedFile[]): Promise<GeneratedFile[]> {
     return Promise.all(
-      files.map(async (file) => ({
-        ...file,
-        content: await this.optimizeCode(file.content, file.path),
-      }))
+      files.map(async (file) => {
+        try {
+          return {
+            ...file,
+            content: await this.optimizeCode(file.content, file.path),
+          };
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : String(error);
+          console.warn(`⚠ AI optimization failed for ${file.path}: ${msg}. Using original code.`);
+          return file;
+        }
+      })
     );
   }
 
@@ -25,6 +33,10 @@ export class AICodeOptimizer {
         content: `Optimize this ${filePath}:\n\`\`\`\n${code}\n\`\`\``,
       },
     ]);
+
+    if (!response.content) {
+      throw new Error('LLM returned empty response');
+    }
 
     return this.extractCode(response.content);
   }
