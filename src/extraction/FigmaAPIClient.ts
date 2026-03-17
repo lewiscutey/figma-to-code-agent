@@ -14,7 +14,7 @@ export class FigmaAPIClient {
   private readonly axiosInstance: AxiosInstance;
   private readonly maxRetries = 3;
   private readonly baseRetryDelay = 1000; // milliseconds
-  private readonly cache: FigmaCache;
+  private readonly cache: FigmaCache | null;
   private readonly cacheMaxAge = 24 * 60 * 60 * 1000; // 24 hours (increased from 5 minutes)
 
   constructor(
@@ -25,7 +25,7 @@ export class FigmaAPIClient {
       throw new Error('Figma access token is required');
     }
 
-    this.cache = enableCache ? new FigmaCache() : (null as any);
+    this.cache = enableCache ? new FigmaCache() : null;
 
     this.axiosInstance = axios.create({
       baseURL: this.baseURL,

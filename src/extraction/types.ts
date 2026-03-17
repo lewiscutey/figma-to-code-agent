@@ -87,6 +87,9 @@ export interface Node {
   // Component properties
   componentId?: string;
   componentProperties?: Record<string, any>;
+
+  // Mask property
+  isMask?: boolean;
 }
 
 export interface LayoutGrid {

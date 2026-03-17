@@ -43,7 +43,7 @@ export class FigmaCache {
       const data = JSON.parse(fs.readFileSync(cachePath, 'utf-8'));
 
       // Check expiration
-      if (maxAge && data.timestamp) {
+      if (maxAge && maxAge > 0 && data.timestamp) {
         const age = Date.now() - data.timestamp;
         if (age > maxAge) {
           this.delete(key);

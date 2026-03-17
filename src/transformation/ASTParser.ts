@@ -38,8 +38,8 @@ export class ASTParser {
 
     if ('children' in figmaNode && figmaNode.children) {
       astNode.children = figmaNode.children
-        .filter((child) => (child as any).visible !== false)
-        .filter((child) => (child as any).isMask !== true)
+        .filter((child) => child.visible !== false)
+        .filter((child) => child.isMask !== true)
         .map((child) => this.parseNode(child, astNode));
     }
 
@@ -119,10 +119,10 @@ export class ASTParser {
     }
 
     if ('paddingLeft' in figmaNode) {
-      const top = (figmaNode as any).paddingTop ?? 0;
-      const right = (figmaNode as any).paddingRight ?? 0;
-      const bottom = (figmaNode as any).paddingBottom ?? 0;
-      const left = (figmaNode as any).paddingLeft ?? 0;
+      const top = figmaNode.paddingTop ?? 0;
+      const right = figmaNode.paddingRight ?? 0;
+      const bottom = figmaNode.paddingBottom ?? 0;
+      const left = figmaNode.paddingLeft ?? 0;
       layout.padding = createSpacing(top, right, bottom, left);
     }
 

@@ -272,39 +272,45 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error('FIGMA_TOKEN environment variable is required');
         }
 
-        // Simple analysis (can be enhanced later)
-        const analysis = {
-          success: true,
-          analysis: {
-            complexity: 'medium',
-            nodeCount: 0,
-            issues: [],
-            suggestions: [
-              'Consider using semantic HTML elements for better accessibility',
-              'Ensure all interactive elements have proper ARIA labels',
-              'Optimize image assets for web performance',
-            ],
-          },
-        };
+        const { fileKey, nodeId } = parseFigmaUrl(figmaUrl);
 
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(analysis, null, 2),
-            },
-          ],
-        };
-      }
+        const agent = new FigmaToCodeAgent({
+          figmaToken,
+          fileKey,
+          nodeIds: nodeId ? [nodeId] : undefined,
+          framework: 'react',
+          styleMode: 'css-modules',
+          typescript: false,
+          outputDir: './output',
+        });
 
-      case 'update_component': {
-        const { figmaUrl, componentPath } = args as any;
+        // Run conversion to get AST stats
+        let nodeCount = 0;
+        let complexity = 'low';
+        const issues: string[] = [];
+        const suggestions: string[] = [];
 
-        if (!figmaUrl || !componentPath) {
-          throw new Error('figmaUrl and componentPath are required');
+        try {
+          const files = await agent.convert();
+          nodeCount = files.length;
+          if (nodeCount > 10) complexity = 'high';
+          else if (nodeCount > 5) complexity = 'medium';
+
+          for (const file of files) {
+            if (file.content.length > 10000) {
+              issues.push(`${path.basename(file.path)} is large (${Math.round(file.content.length / 1000)}KB) — consider splitting`);
+            }
+          }
+        } catch (err) {
+          issues.push(`Analysis encountered an error: ${err instanceof Error ? err.message : String(err)}`);
         }
 
-        // Placeholder implementation
+        suggestions.push(
+          'Consider using semantic HTML elements for better accessibility',
+          'Ensure all interactive elements have proper ARIA labels',
+          'Optimize image assets for web performance',
+        );
+
         return {
           content: [
             {
@@ -312,13 +318,83 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify(
                 {
                   success: true,
-                  updatedFiles: [componentPath],
-                  changes: {
-                    added: [],
-                    modified: [componentPath],
-                    removed: [],
-                  },
-                  message: 'Component update feature is under development',
+                  analysis: { complexity, nodeCount, issues, suggestions },
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
+      case 'update_component': {
+        const { figmaUrl, componentPath, updateMode = 'full' } = args as any;
+
+        if (!figmaUrl || !componentPath) {
+          throw new Error('figmaUrl and componentPath are required');
+        }
+
+        const figmaToken = process.env.FIGMA_TOKEN;
+        if (!figmaToken) {
+          throw new Error('FIGMA_TOKEN environment variable is required');
+        }
+
+        const resolvedPath = path.resolve(process.cwd(), componentPath);
+        if (!fs.existsSync(resolvedPath)) {
+          throw new Error(`Component file not found: ${componentPath}`);
+        }
+
+        const isReact = resolvedPath.match(/\.(jsx|tsx)$/);
+        const isVue = resolvedPath.endsWith('.vue');
+        if (!isReact && !isVue) {
+          throw new Error('Component must be a .jsx, .tsx, or .vue file');
+        }
+
+        const framework = isVue ? 'vue' : 'react';
+        const { fileKey, nodeId } = parseFigmaUrl(figmaUrl);
+
+        const agent = new FigmaToCodeAgent({
+          figmaToken,
+          fileKey,
+          nodeIds: nodeId ? [nodeId] : undefined,
+          framework: framework as 'react' | 'vue',
+          styleMode: 'css-modules',
+          typescript: resolvedPath.endsWith('.tsx'),
+          outputDir: path.dirname(resolvedPath),
+        });
+
+        const files = await agent.convert();
+
+        const updatedFiles: string[] = [];
+        for (const file of files) {
+          const destPath = path.resolve(process.cwd(), file.path);
+          const dir = path.dirname(destPath);
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+
+          if (updateMode === 'styles-only' && !file.path.match(/\.(css|scss|module\.css)$/)) {
+            continue;
+          }
+          if (updateMode === 'structure-only' && file.path.match(/\.(css|scss|module\.css)$/)) {
+            continue;
+          }
+
+          fs.writeFileSync(destPath, file.content, 'utf-8');
+          updatedFiles.push(file.path);
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  updatedFiles,
+                  updateMode,
+                  message: `Updated ${updatedFiles.length} file(s)`,
                 },
                 null,
                 2
